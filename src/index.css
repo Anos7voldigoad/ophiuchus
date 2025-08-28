@@ -1,0 +1,49 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Base typography and rendering */
+:root {
+  --bg-base: #051F20;
+  --text-base: #ffffff;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  background: radial-gradient(1200px 600px at 10% 0%, rgba(142,182,155,0.06), transparent 50%),
+              radial-gradient(1000px 600px at 90% 100%, rgba(218,241,222,0.06), transparent 50%),
+              var(--bg-base);
+  color: var(--text-base);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Provide consistent focus rings */
+*:focus-visible {
+  outline: 2px solid #8EB69B;
+  outline-offset: 2px;
+}
+
+/* Keep headers below sticky nav when deep-linking */
+html {
+  scroll-padding-top: 72px;
+}
+
+/* Reduce motion if user prefers */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
