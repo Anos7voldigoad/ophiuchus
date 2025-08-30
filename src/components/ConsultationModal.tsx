@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { PrimaryBtn } from "./ui";
 
 type ContactMethod = "email" | "phone";
 
@@ -31,10 +30,10 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-const SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc"; // reCAPTCHA v3 site key
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZukA5er2vEDPuKj3uHiw_YpZ8HWmIysNU3JNNXFBh0OnEZ04Q_8qc-zdHD8srzOt37g/exec";
+  const SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc"; // reCAPTCHA v3 site key
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzjfLap5cLkNLzcT6XCs0NALX6lAxwHfP0qsBmG591Qf2B-qitK0_3yyOcrLEhvN08gQ/exec";
 
-const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
   // Honeypot check
@@ -46,44 +45,40 @@ const handleSubmit = async (e: React.FormEvent) => {
   try {
     // Get reCAPTCHA v3 token
     const token = await new Promise<string>((resolve, reject) => {
-      // @ts-ignore
-      window.grecaptcha.ready(() => {
-        // @ts-ignore
-        window.grecaptcha
-          .execute(SITE_KEY, { action: "submit" })
-          .then((token: string) => {
-            console.log("Generated token:", token); // Debug log
-            resolve(token);
-          })
-          .catch(reject);
-      });
+      if (typeof window !== 'undefined' && (window as any).grecaptcha) {
+        (window as any).grecaptcha.ready(() => {
+          (window as any).grecaptcha
+            .execute(SITE_KEY, { action: "submit" })
+            .then((token: string) => {
+              resolve(token);
+            })
+            .catch(reject);
+        });
+      } else {
+        reject(new Error('reCAPTCHA not loaded'));
+      }
     });
 
-    // Build JSON payload for Apps Script
-    const payload = {
-      name: formData.name,
-      gmail: formData.gmail,
-      businessName: formData.businessName,  // Changed from "business" to "businessName"
-      service: formData.service,
-      date: formData.date,
-      time: formData.time,
-      contactMethod: formData.contactMethod,
-      phone: formData.contactMethod === "phone" ? formData.phone : "",
-      message: formData.message,
-      botField: formData.botField,
-      recaptchaToken: token  // Changed from "token" to "recaptchaToken"
-    };
+    // Build URL-encoded body (no custom headers -> no CORS preflight)
+    const body = new URLSearchParams();
+    body.set("name", formData.name);
+    body.set("gmail", formData.gmail);
+    body.set("businessName", formData.businessName);
+    body.set("service", formData.service);
+    body.set("date", formData.date);
+    body.set("time", formData.time);
+    body.set("contactMethod", formData.contactMethod);
+    body.set("phone", formData.contactMethod === "phone" ? formData.phone : "");
+    body.set("message", formData.message);
+    body.set("botField", formData.botField);
+    body.set("recaptchaToken", token);
 
     const response = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
+      body: body // IMPORTANT: no headers -> browser sets x-www-form-urlencoded and avoids preflight
     });
 
     const result = await response.json();
-    console.log("Server Response:", result);
     
     if (result.success) {
       setStatus("success");
@@ -116,6 +111,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
   const resetForm = () => {
+    
     
     
     setStatus("");

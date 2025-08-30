@@ -35,11 +35,3 @@ export const IconChart: React.FC = () => (
 
 
 
-
-
-
-
-
-
-
-

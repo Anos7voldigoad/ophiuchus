@@ -8,11 +8,8 @@ interface SplashScreenProps {
 
 const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
   useEffect(() => {
-    console.log('SplashScreen mounted - should be visible');
-    
     // Simple timer to finish splash
     const timer = setTimeout(() => {
-      console.log('SplashScreen finishing');
       onFinish();
     }, 6000); // Increased by 2s for longer reveal
     
@@ -86,7 +83,7 @@ const SplashScreen: React.FC<SplashScreenProps> = ({ onFinish }) => {
             alt="Ophiuschus"
             className="absolute inset-0 h-full w-full object-contain drop-shadow-[0_0_30px_rgba(218,241,222,0.6)]"
             onLoad={() => {
-              console.log('Image loaded successfully');
+              // Image loaded successfully
             }}
             onError={(e) => {
               console.error('Image failed to load:', e);
