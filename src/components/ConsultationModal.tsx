@@ -32,12 +32,12 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
   };
 
 const SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc"; // reCAPTCHA v3 site key
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxaz9fBVmfxn9rrCdmkc5snuecaderTvPQAgX7GBCADFYqHcsRyGjpISCd_q07AfGUH9w/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwQP2v-vgeShD5u3yZTymlFtjS24cFNTekQ-NO9TvTnH8Yc8pkR9sbTrw7gh_YdMGyZYA/exec";
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
 
-  // Honeypot
+  // Honeypot check
   if (formData.botField) return;
 
   setIsSubmitting(true);
@@ -59,8 +59,7 @@ const handleSubmit = async (e: React.FormEvent) => {
       });
     });
 
-    // Build JSON payload for Apps Script
-    const payload = {
+    const formDataToSend = {
       name: formData.name,
       gmail: formData.gmail,
       business: formData.businessName,
@@ -74,17 +73,18 @@ const handleSubmit = async (e: React.FormEvent) => {
       token: token
     };
 
-    const res = await fetch(APPS_SCRIPT_URL, {
+    const response = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json", // 🔑 VERY IMPORTANT
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(formDataToSend), // 🔑 send JSON
     });
 
-    const json = await res.json().catch(() => ({}));
-
-    if (res.ok && json.success) {
+    const result = await response.json();
+    console.log("Server Response:", result);
+    
+    if (result.success) {
       setStatus("success");
       setFormData({
         name: "",
@@ -103,11 +103,11 @@ const handleSubmit = async (e: React.FormEvent) => {
         setStatus("");
       }, 2000);
     } else {
-      console.error("Apps Script error:", json);
+      console.error("Apps Script error:", result);
       setStatus("error");
     }
   } catch (err) {
-    console.error(err);
+    console.error("Error:", err);
     setStatus("error");
   } finally {
     setIsSubmitting(false);
