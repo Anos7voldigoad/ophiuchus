@@ -59,23 +59,27 @@ const handleSubmit = async (e: React.FormEvent) => {
       });
     });
 
-    // Build URL-encoded body (no custom headers -> no CORS preflight)
-    const body = new URLSearchParams();
-    body.set("name", formData.name);
-    body.set("gmail", formData.gmail);               // <-- map email -> gmail (your sheet header)
-    body.set("business", formData.businessName);
-    body.set("service", formData.service);
-    body.set("date", formData.date);
-    body.set("time", formData.time);
-    body.set("contactMethod", formData.contactMethod);
-    body.set("phone", formData.contactMethod === "phone" ? formData.phone : "");
-    body.set("message", formData.message);
-    body.set("botField", formData.botField);
-    body.set("token", token);
+    // Build JSON payload for Apps Script
+    const payload = {
+      name: formData.name,
+      gmail: formData.gmail,
+      business: formData.businessName,
+      service: formData.service,
+      contactMethod: formData.contactMethod,
+      date: formData.date,
+      time: formData.time,
+      message: formData.message,
+      phone: formData.contactMethod === "phone" ? formData.phone : "",
+      botField: formData.botField,
+      token: token
+    };
 
     const res = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
-      body, // IMPORTANT: no headers -> browser sets x-www-form-urlencoded and avoids preflight
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
     });
 
     const json = await res.json().catch(() => ({}));
