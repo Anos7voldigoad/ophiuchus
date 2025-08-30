@@ -32,7 +32,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
   };
 
 const SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc"; // reCAPTCHA v3 site key
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw75BF6ItpCU90ZFnSnpnUAhBV8BBPMUFVbl6w7IFBVYL21YXfhDcjuU3dvhgN66BKe8A/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzZS5Jh3NllRKr5oOsMknYDRdAwBL5UHh998PXJ4NFQ4dmcZ3y5ts_2kfYIUfRXQ3Q94Q/exec";
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
