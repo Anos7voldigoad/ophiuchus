@@ -12,9 +12,7 @@ import SplashScreen from "./components/SplashScreen";
 import ErrorBoundary from "./components/ErrorBoundary";
 import BackToTop from "./components/BackToTop";
 import { motion, useReducedMotion } from "framer-motion";
-import titleLogo from "./assets/ophiuschus.png";
 import ConsultationModal from "./components/ConsultationModal";
-import AmbientSparkles from "./components/AmbientSparkles";
 
 const App: React.FC = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -22,28 +20,7 @@ const App: React.FC = () => {
   const [showConsultation, setShowConsultation] = useState(false);
   const shouldReduceMotion = useReducedMotion();
 
-  useEffect(() => {
-    // Always show splash screen (remove sessionStorage check)
-    // This ensures the splash screen shows every time
-  }, []);
-
-  // Set favicon (title logo) to viperr.png at runtime via Vite asset URL
-  useEffect(() => {
-    const ensureFavicon = (rel: string) => {
-      let link = document.querySelector<HTMLLinkElement>(`link[rel="${rel}"]`);
-      if (!link) {
-        link = document.createElement("link");
-        link.rel = rel;
-        document.head.appendChild(link);
-      }
-      link.href = titleLogo;
-    };
-    ensureFavicon("icon");
-    ensureFavicon("shortcut icon");
-    // Optional: touch icon
-    ensureFavicon("apple-touch-icon");
-  }, []);
-
+  // Handle consultation modal events
   useEffect(() => {
     const open = () => setShowConsultation(true);
     window.addEventListener('open-consultation', open as EventListener);
@@ -52,33 +29,19 @@ const App: React.FC = () => {
 
   const handleSplashFinish = () => {
     setShowSplash(false);
-    // Immediate transition to prevent white flash
     setMainContentReady(true);
   };
 
   return (
     <ErrorBoundary>
-      {/* Unified seamless background */}
+      {/* Optimized background */}
       <div className="fixed inset-0 bg-gradient-to-br from-[#051F20] via-[#0B2B26] to-[#163832] z-0" />
       
-      {/* Additional subtle background elements for depth */}
+      {/* Subtle background elements */}
       <div className="fixed inset-0 z-0">
-        {/* Floating orbs for depth */}
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-[#8EB69B]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-[#235347]/5 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 w-64 h-64 sm:w-80 sm:h-80 bg-[#DAF1DE]/3 rounded-full blur-3xl" />
-        
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-5">
-          <div className="h-full w-full" style={{
-            backgroundImage: `radial-gradient(circle at 1px 1px, rgba(142, 182, 155, 0.2) 1px, transparent 0)`,
-            backgroundSize: '60px 60px'
-          }} />
-        </div>
-      </div>
-      {/* Ambient sparkles */}
-      <div className="fixed inset-0 z-0">
-        <AmbientSparkles count={26} />
       </div>
       
       <AnimatePresence mode="wait">
@@ -96,7 +59,7 @@ const App: React.FC = () => {
             scale: 1,
             transition: { 
               duration: 1.2,
-              ease: [0.25, 0.46, 0.45, 0.94]
+              ease: [0.16, 1, 0.3, 1]
             }
           }}
         >
@@ -123,11 +86,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-
-
-
-
-
-
-
-

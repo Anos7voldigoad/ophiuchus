@@ -1,6 +1,15 @@
 User-agent: *
 Allow: /
-Sitemap: https://your-domain.github.io/sitemap.xml
+
+# Sitemap
+Sitemap: https://ophiuschus.ai/sitemap.xml
+
+# Crawl-delay
+Crawl-delay: 1
+
+# Disallow admin areas (if any)
+Disallow: /admin/
+Disallow: /private/
 
 
 

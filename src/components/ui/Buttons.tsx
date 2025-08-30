@@ -25,6 +25,3 @@ export const GhostBtn: React.FC<ButtonProps> = ({ href, children }) => (
     {children}
   </a>
 );
-
-
-

@@ -7,24 +7,24 @@ const Results: React.FC = () => {
   const [selectedCase, setSelectedCase] = useState(0);
 
   const metrics = [
-    { value: "-60%", label: "Response Time" },
-    { value: "+38%", label: "Qualified Leads" },
-    { value: "-27%", label: "Support Costs" },
-    { value: "+22", label: "NPS Score" }
+    { value: "+300%", label: "Online Revenue" },
+    { value: "+85%", label: "Customer Reach" },
+    { value: "-60%", label: "Operational Costs" },
+    { value: "+45%", label: "Conversion Rate" }
   ];
 
   const caseStudies = [
     {
-      company: "TechFlow Solutions",
-      challenge: "Manual customer support was overwhelming their small team",
-      solution: "AI-powered chatbot with intelligent routing",
-      results: ["60% reduction in response time", "38% increase in qualified leads"]
+      company: "Local Restaurant Chain",
+      challenge: "No online presence, relying only on walk-in customers and phone orders",
+      solution: "Complete digital transformation with website, online ordering, and automation",
+      results: ["300% increase in online revenue", "85% expansion in customer reach"]
     },
     {
-      company: "GreenLeaf Retail",
-      challenge: "Inventory management was causing stockouts and overstock",
-      solution: "Predictive analytics for demand forecasting",
-      results: ["45% improvement in conversion rate", "35% reduction in processing time"]
+      company: "Retail Store",
+      challenge: "Manual inventory management and limited customer engagement",
+      solution: "E-commerce website with n8n automation and AI voice agents",
+      results: ["60% reduction in operational costs", "45% improvement in conversion rate"]
     }
   ];
 
@@ -48,9 +48,9 @@ const Results: React.FC = () => {
           className="text-center mb-10 sm:mb-12"
         >
           <SectionTitle 
-            eyebrow="Results" 
-            title="Measurable Impact" 
-            subtitle="Real outcomes from real businesses." 
+            eyebrow="Digital Transformation Results" 
+            title="Real Business Impact" 
+            subtitle="See how businesses transformed their operations and scaled online." 
           />
         </motion.div>
 

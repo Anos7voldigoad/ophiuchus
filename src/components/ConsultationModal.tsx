@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 type ContactMethod = "email" | "phone";
@@ -7,6 +7,10 @@ interface ConsultationModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
+
+// reCAPTCHA configuration
+const RECAPTCHA_SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlSmnMaQos27HGofhRABI9vn1KP0HEAGVwufO7Hpnur_EGv6tlGdBwu5mqyuMJVNawWg/exec";
 
 const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -24,97 +28,132 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState("");
+  const [recaptchaLoaded, setRecaptchaLoaded] = useState(false);
+
+  // Check if reCAPTCHA is loaded
+  useEffect(() => {
+    const checkRecaptcha = () => {
+      if (typeof window !== 'undefined' && (window as any).grecaptcha) {
+        setRecaptchaLoaded(true);
+      } else {
+        setTimeout(checkRecaptcha, 100);
+      }
+    };
+    checkRecaptcha();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc"; // reCAPTCHA v3 site key
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwzjfLap5cLkNLzcT6XCs0NALX6lAxwHfP0qsBmG591Qf2B-qitK0_3yyOcrLEhvN08gQ/exec";
+  const getRecaptchaToken = async (): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      if (!recaptchaLoaded) {
+        reject(new Error('reCAPTCHA not loaded'));
+        return;
+      }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-
-  // Honeypot check
-  if (formData.botField) return;
-
-  setIsSubmitting(true);
-  setStatus("");
-
-  try {
-    // Get reCAPTCHA v3 token
-    const token = await new Promise<string>((resolve, reject) => {
-      if (typeof window !== 'undefined' && (window as any).grecaptcha) {
+      try {
         (window as any).grecaptcha.ready(() => {
           (window as any).grecaptcha
-            .execute(SITE_KEY, { action: "submit" })
+            .execute(RECAPTCHA_SITE_KEY, { action: "submit" })
             .then((token: string) => {
               resolve(token);
             })
-            .catch(reject);
+            .catch((error: any) => {
+              console.error('reCAPTCHA execution error:', error);
+              reject(error);
+            });
         });
-      } else {
-        reject(new Error('reCAPTCHA not loaded'));
+      } catch (error) {
+        console.error('reCAPTCHA error:', error);
+        reject(error);
       }
     });
+  };
 
-    // Build URL-encoded body (no custom headers -> no CORS preflight)
-    const body = new URLSearchParams();
-    body.set("name", formData.name);
-    body.set("gmail", formData.gmail);
-    body.set("businessName", formData.businessName);
-    body.set("service", formData.service);
-    body.set("date", formData.date);
-    body.set("time", formData.time);
-    body.set("contactMethod", formData.contactMethod);
-    body.set("phone", formData.contactMethod === "phone" ? formData.phone : "");
-    body.set("message", formData.message);
-    body.set("botField", formData.botField);
-    body.set("recaptchaToken", token);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    const response = await fetch(APPS_SCRIPT_URL, {
-      method: "POST",
-      body: body // IMPORTANT: no headers -> browser sets x-www-form-urlencoded and avoids preflight
-    });
-
-    const result = await response.json();
-    
-    if (result.success) {
-      setStatus("success");
-      setFormData({
-        name: "",
-        gmail: "",
-        businessName: "",
-        service: "",
-        date: "",
-        time: "",
-        contactMethod: "email",
-        phone: "",
-        message: "",
-        botField: "",
-      });
-      setTimeout(() => {
-        onClose();
-        setStatus("");
-      }, 2000);
-    } else {
-      console.error("Apps Script error:", result);
-      setStatus("error");
+    // Honeypot check
+    if (formData.botField) {
+      console.log('Bot detected');
+      return;
     }
-  } catch (err) {
-    console.error("Error:", err);
-    setStatus("error");
-  } finally {
-    setIsSubmitting(false);
-  }
-};
 
-  const resetForm = () => {
-    
-    
-    
+    // Validation
+    if (!formData.name.trim() || !formData.gmail.trim()) {
+      setStatus("error");
+      return;
+    }
+
+    setIsSubmitting(true);
     setStatus("");
+
+    try {
+      // Get reCAPTCHA token
+      const token = await getRecaptchaToken();
+
+      // Build URL-encoded body
+      const body = new URLSearchParams();
+      body.set("name", formData.name.trim());
+      body.set("gmail", formData.gmail.trim());
+      body.set("businessName", formData.businessName.trim());
+      body.set("service", formData.service);
+      body.set("date", formData.date);
+      body.set("time", formData.time);
+      body.set("contactMethod", formData.contactMethod);
+      body.set("phone", formData.contactMethod === "phone" ? formData.phone.trim() : "");
+      body.set("message", formData.message.trim());
+      body.set("botField", formData.botField);
+      body.set("recaptchaToken", token);
+      body.set("timestamp", new Date().toISOString());
+
+      const response = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        body: body,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setStatus("success");
+        // Reset form
+        setFormData({
+          name: "",
+          gmail: "",
+          businessName: "",
+          service: "",
+          date: "",
+          time: "",
+          contactMethod: "email",
+          phone: "",
+          message: "",
+          botField: "",
+        });
+        // Close modal after 2 seconds
+        setTimeout(() => {
+          onClose();
+          setStatus("");
+        }, 2000);
+      } else {
+        console.error("Apps Script error:", result);
+        setStatus("error");
+      }
+    } catch (err) {
+      console.error("Submission error:", err);
+      setStatus("error");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -124,44 +163,60 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4"
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-md z-50 p-4"
           onClick={onClose}
         >
-                      <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0, y: 20 }}
-              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
-              className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin"
-              onClick={(e) => e.stopPropagation()}
-            >
-            {/* Enhanced glassmorphism background effects */}
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#8EB69B]/15 to-[#DAF1DE]/10 blur-2xl" />
-            <div className="absolute inset-0 rounded-3xl bg-gradient-to-tl from-[#163832]/20 to-transparent" />
-            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#8EB69B]/20 via-transparent to-[#DAF1DE]/20 blur-lg opacity-50" />
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 30 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 30 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Enhanced background with neon effects */}
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-[#8EB69B]/15 to-[#DAF1DE]/15 blur-2xl" style={{ boxShadow: '0 0 60px rgba(142, 182, 155, 0.2)' }} />
             
-            <div className="relative bg-gradient-to-br from-[#0B2B26]/80 to-[#163832]/90 border border-[#8EB69B]/30 rounded-3xl shadow-2xl backdrop-blur-2xl">
-                              {/* Header with enhanced glassmorphism */}
-                <div className="flex items-center justify-between p-6 border-b border-[#8EB69B]/20 bg-gradient-to-r from-[#8EB69B]/5 to-transparent backdrop-blur-sm">
-                  <div>
-                    <h2 className="text-2xl font-semibold text-white drop-shadow-sm">Book a Consultation</h2>
-                    <p className="text-sm text-white/70 mt-1 drop-shadow-sm">Let's discuss your AI automation needs</p>
-                  </div>
-                  <button
-                    onClick={onClose}
-                    className="text-white/60 hover:text-white transition-all duration-200 p-2 rounded-full hover:bg-white/10 hover:shadow-lg hover:shadow-[#8EB69B]/20 backdrop-blur-sm"
-                    aria-label="Close modal"
-                  >
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
+            <div className="relative bg-gradient-to-br from-[#0B2B26]/95 via-[#163832]/90 to-[#0B2B26]/95 border border-[#8EB69B]/40 rounded-2xl shadow-2xl backdrop-blur-xl" style={{ 
+              boxShadow: '0 20px 60px rgba(142, 182, 155, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
+              backdropFilter: 'blur(24px)'
+            }}>
+              {/* Neon border effect */}
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#8EB69B]/20 via-transparent to-[#DAF1DE]/20 opacity-60" />
+              
+              {/* Header with enhanced glassmorphism */}
+              <motion.div 
+                className="relative flex items-center justify-between p-6 border-b border-[#8EB69B]/30 bg-gradient-to-r from-[#8EB69B]/10 to-transparent backdrop-blur-sm rounded-t-2xl"
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <div>
+                  <h2 className="text-2xl font-bold text-white drop-shadow-[0_0_8px_rgba(142,182,155,0.3)]">Start Your Digital Transformation</h2>
+                  <p className="text-sm text-white/70 mt-1">Let's discuss your journey to going online</p>
                 </div>
+                <motion.button
+                  onClick={onClose}
+                  className="text-white/60 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10 backdrop-blur-sm"
+                  aria-label="Close modal"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </motion.button>
+              </motion.div>
 
-              {/* Form with glassmorphism effects */}
-              <form 
+              {/* Form with enhanced glassmorphism */}
+              <motion.form 
                 onSubmit={handleSubmit} 
-                className="p-6 space-y-3 bg-gradient-to-b from-transparent to-[#8EB69B]/5 backdrop-blur-sm"
+                className="relative p-6 space-y-4 bg-gradient-to-b from-transparent to-[#8EB69B]/5 backdrop-blur-sm"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
               >
                 {/* Honeypot field */}
                 <input
@@ -171,12 +226,17 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                   onChange={handleChange}
                   style={{ display: "none" }}
                   tabIndex={-1}
+                  autoComplete="off"
                 />
 
-                {/* Name and Email in a row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-white/90 mb-1">
+                {/* Name and Email */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <label htmlFor="name" className="block text-sm font-semibold text-white/90 mb-2">
                       Full Name *
                     </label>
                     <input
@@ -187,11 +247,17 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       value={formData.name}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                      autoComplete="name"
+                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     />
-                  </div>
-                  <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-1">
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <label htmlFor="email" className="block text-sm font-semibold text-white/90 mb-2">
                       Email Address *
                     </label>
                     <input
@@ -202,15 +268,21 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       value={formData.gmail}
                       onChange={handleChange}
                       required
-                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                      autoComplete="email"
+                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     />
-                  </div>
+                  </motion.div>
                 </div>
 
-                {/* Business Name and Service in a row */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="businessName" className="block text-sm font-medium text-white/90 mb-1">
+                {/* Business Name and Service */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <label htmlFor="businessName" className="block text-sm font-semibold text-white/90 mb-2">
                       Business Name
                     </label>
                     <input
@@ -220,11 +292,17 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       placeholder="Your company name"
                       value={formData.businessName}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                      autoComplete="organization"
+                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     />
-                  </div>
-                  <div>
-                    <label htmlFor="service" className="block text-sm font-medium text-white/90 mb-1">
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.5, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <label htmlFor="service" className="block text-sm font-semibold text-white/90 mb-2">
                       Service of Interest
                     </label>
                     <select
@@ -232,22 +310,28 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       name="service"
                       value={formData.service}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     >
                       <option value="">Select a service</option>
-                      <option value="chatbot">AI Chatbot Development</option>
-                      <option value="automation">Workflow Automation</option>
-                      <option value="ads">Meta/Google Ads Management</option>
-                      <option value="consulting">AI Strategy Consulting</option>
-                      <option value="custom">Custom AI Solution</option>
+                      <option value="website">Website Development</option>
+                      <option value="automation">Automation Integration (n8n)</option>
+                      <option value="voice">AI Voice Agents</option>
+                      <option value="ads">Ad Management</option>
+                      <option value="consulting">Digital Strategy Consulting</option>
+                      <option value="custom">Custom Solution</option>
                     </select>
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Date and Time */}
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="date" className="block text-sm font-medium text-white/90 mb-1">
+                <div className="grid grid-cols-2 gap-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <label htmlFor="date" className="block text-sm font-semibold text-white/90 mb-2">
                       Preferred Date
                     </label>
                     <input
@@ -256,11 +340,17 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       name="date"
                       value={formData.date}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                      min={new Date().toISOString().split('T')[0]}
+                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     />
-                  </div>
-                  <div>
-                    <label htmlFor="time" className="block text-sm font-medium text-white/90 mb-1">
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <label htmlFor="time" className="block text-sm font-semibold text-white/90 mb-2">
                       Preferred Time
                     </label>
                     <input
@@ -269,17 +359,22 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       name="time"
                       value={formData.time}
                       onChange={handleChange}
-                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     />
-                  </div>
+                  </motion.div>
                 </div>
 
                 {/* Contact Method */}
-                <div>
-                  <label className="block text-sm font-medium text-white/90 mb-2">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <label className="block text-sm font-semibold text-white/90 mb-3">
                     Preferred Contact Method
                   </label>
-                  <div className="flex gap-4">
+                  <div className="flex gap-6">
                     <label className="flex items-center">
                       <input
                         type="radio"
@@ -287,9 +382,9 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                         value="email"
                         checked={formData.contactMethod === "email"}
                         onChange={handleChange}
-                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/30 focus:ring-[#8EB69B]/50"
+                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/40 focus:ring-[#8EB69B]/60"
                       />
-                      <span className="ml-2 text-white/90 text-sm">Email</span>
+                      <span className="ml-2 text-white/90 text-sm font-medium">Email</span>
                     </label>
                     <label className="flex items-center">
                       <input
@@ -298,34 +393,47 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                         value="phone"
                         checked={formData.contactMethod === "phone"}
                         onChange={handleChange}
-                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/30 focus:ring-[#8EB69B]/50"
+                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/40 focus:ring-[#8EB69B]/60"
                       />
-                      <span className="ml-2 text-white/90 text-sm">Phone</span>
+                      <span className="ml-2 text-white/90 text-sm font-medium">Phone</span>
                     </label>
                   </div>
-                </div>
+                </motion.div>
 
                 {/* Phone Number (conditional) */}
-                {formData.contactMethod === "phone" && (
-                  <div>
-                    <label htmlFor="phone" className="block text-sm font-medium text-white/90 mb-1">
-                      Phone Number
-                    </label>
-                    <input
-                      type="tel"
-                      id="phone"
-                      name="phone"
-                      placeholder="+1 (555) 123-4567"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
-                    />
-                  </div>
-                )}
+                <AnimatePresence>
+                  {formData.contactMethod === "phone" && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <label htmlFor="phone" className="block text-sm font-semibold text-white/90 mb-2">
+                        Phone Number
+                      </label>
+                      <input
+                        type="tel"
+                        id="phone"
+                        name="phone"
+                        placeholder="+1 (555) 123-4567"
+                        value={formData.phone}
+                        onChange={handleChange}
+                        autoComplete="tel"
+                        className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                        style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
+                      />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Message */}
-                <div>
-                  <label htmlFor="message" className="block text-sm font-medium text-white/90 mb-1">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 1.0, ease: [0.16, 1, 0.3, 1] }}
+                >
+                  <label htmlFor="message" className="block text-sm font-semibold text-white/90 mb-2">
                     Project Details
                   </label>
                   <textarea
@@ -335,17 +443,30 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                     value={formData.message}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all resize-none text-sm backdrop-blur-sm shadow-inner"
+                    className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all resize-none duration-300 text-sm backdrop-blur-sm"
+                    style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                   />
-                </div>
+                </motion.div>
 
+                {/* reCAPTCHA Status */}
+                {!recaptchaLoaded && (
+                  <div className="text-xs text-yellow-400 text-center drop-shadow-[0_0_4px_rgba(251,191,36,0.6)]">
+                    Loading security verification...
+                  </div>
+                )}
 
-
-                {/* Submit Button */}
-                <button
+                {/* Enhanced Submit Button with neon effects */}
+                <motion.button
                   type="submit"
-                  disabled={isSubmitting}
-                  className="w-full inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#8EB69B] to-[#DAF1DE] px-6 py-3 text-sm font-semibold text-black shadow-lg shadow-[#8EB69B]/30 transition hover:from-[#7AA68A] hover:to-[#C5E5CC] focus:outline-none focus:ring-2 focus:ring-[#DAF1DE] focus:ring-offset-2 focus:ring-offset-[#8EB69B] disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting || !recaptchaLoaded}
+                  className="w-full inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-[#8EB69B] to-[#DAF1DE] px-6 py-3 text-sm font-bold text-black shadow-xl transition-all duration-300 hover:from-[#7AA68A] hover:to-[#C5E5CC] focus:outline-none focus:ring-2 focus:ring-[#DAF1DE] focus:ring-offset-2 focus:ring-offset-[#8EB69B] disabled:opacity-50 disabled:cursor-not-allowed"
+                  style={{ 
+                    boxShadow: '0 8px 32px rgba(142, 182, 155, 0.3), 0 0 0 1px rgba(142, 182, 155, 0.1)',
+                    filter: 'drop-shadow(0 0 8px rgba(142, 182, 155, 0.4))'
+                  }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                 >
                   {isSubmitting ? (
                     <>
@@ -356,31 +477,39 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       Submitting...
                     </>
                   ) : (
-                    "Book Consultation"
+                    "Start My Transformation"
                   )}
-                </button>
+                </motion.button>
 
-                {/* Status Messages with glassmorphism */}
-                {status === "success" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-[#8EB69B]/20 border border-[#8EB69B]/30 rounded-2xl text-[#DAF1DE] text-sm text-center backdrop-blur-sm shadow-lg shadow-[#8EB69B]/20"
-                  >
-                    ✅ Consultation request submitted successfully! We'll be in touch soon.
-                  </motion.div>
-                )}
+                {/* Enhanced Status Messages with neon effects */}
+                <AnimatePresence>
+                  {status === "success" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      className="p-3 bg-gradient-to-r from-[#8EB69B]/20 to-[#DAF1DE]/20 border border-[#8EB69B]/40 rounded-xl text-[#DAF1DE] text-sm text-center backdrop-blur-sm"
+                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)' }}
+                    >
+                      Transformation request submitted successfully! We'll be in touch soon to start your journey online.
+                    </motion.div>
+                  )}
 
-                {status === "error" && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="p-3 bg-red-500/20 border border-red-500/30 rounded-2xl text-red-300 text-sm text-center backdrop-blur-sm shadow-lg shadow-red-500/20"
-                  >
-                    ❌ Something went wrong. Please try again or contact us directly.
-                  </motion.div>
-                )}
-              </form>
+                  {status === "error" && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                      className="p-3 bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/40 rounded-xl text-red-300 text-sm text-center backdrop-blur-sm"
+                      style={{ boxShadow: '0 4px 20px rgba(239, 68, 68, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)' }}
+                    >
+                      Something went wrong. Please try again or contact us directly at hello@ophiuschus.ai
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.form>
             </div>
           </motion.div>
         </motion.div>

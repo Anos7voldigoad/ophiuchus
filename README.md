@@ -1,133 +1,269 @@
-# Ophiuschus AI Landing Page
+# Ophiuschus AI - Digital Transformation Solutions
 
-A modern, responsive landing page built with React, TypeScript, and Framer Motion.
+A modern, high-performance website for complete digital transformation services including website development, automation, AI voice agents, and ad management.
 
-## Features
+## 🚀 Features
 
-- ✨ **Splash Screen**: Beautiful animated splash screen with fallback content
-- 🎨 **Modern UI**: Built with Tailwind CSS for consistent design
-- 🚀 **Performance**: Optimized with Vite and code splitting
-- 📱 **Responsive**: Mobile-first design approach
-- 🛡️ **Error Handling**: Comprehensive error boundaries and fallbacks
-- ⚡ **Fast Loading**: Optimized assets and lazy loading
+- **Complete Digital Solutions**: Website development, n8n automation, AI voice agents, ad management
+- **SEO Optimized**: Comprehensive meta tags, structured data, sitemap, and performance optimizations
+- **Performance Focused**: Lazy loading, code splitting, image optimization, and smooth animations
+- **Mobile First**: Responsive design that works perfectly on all devices
+- **Accessibility**: WCAG compliant with proper ARIA labels and keyboard navigation
+- **Security**: reCAPTCHA v3 integration and form validation
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- **Frontend**: React 18 + TypeScript
-- **Styling**: Tailwind CSS
-- **Animations**: Framer Motion
-- **Build Tool**: Vite
-- **Package Manager**: npm
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite with optimized configuration
+- **Styling**: Tailwind CSS with custom design system
+- **Animations**: Framer Motion with performance optimizations
+- **SEO**: React Helmet Async, structured data, meta tags
+- **Performance**: Lazy loading, code splitting, image optimization
 
-## Getting Started
+## 📦 Installation
 
-### Prerequisites
-
-- Node.js 18+ 
-- npm 9+
-
-### Installation
-
-1. Clone the repository:
 ```bash
-git clone <repository-url>
-cd my-app
-```
+# Clone the repository
+git clone https://github.com/your-username/ophiuschus-ai.git
+cd ophiuschus-ai
 
-2. Install dependencies:
-```bash
+# Install dependencies
 npm install
-```
 
-3. Start the development server:
-```bash
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
 ```
 
-4. Open your browser and navigate to `http://localhost:3000`
+## 🔧 Configuration
 
-### Build for Production
+### Environment Variables
 
+Create a `.env` file in the root directory:
+
+```env
+VITE_SITE_URL=https://ophiuschus.ai
+VITE_RECAPTCHA_SITE_KEY=6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc
+VITE_APPS_SCRIPT_URL=https://script.google.com/macros/s/AKfycbwlSmnMaQos27HGofhRABI9vn1KP0HEAGVwufO7Hpnur_EGv6tlGdBwu5mqyuMJVNawWg/exec
+```
+
+### SEO Configuration
+
+Update SEO settings in `index.html` and `src/components/SEO.tsx`:
+
+- Meta descriptions
+- Open Graph tags
+- Twitter Card tags
+- Structured data
+- Canonical URLs
+
+## 🎯 SEO Optimizations
+
+### Meta Tags
+- Comprehensive title and description tags
+- Open Graph and Twitter Card meta tags
+- Canonical URLs and robots directives
+- Structured data (JSON-LD) for rich snippets
+
+### Performance
+- Lazy loading for images and components
+- Code splitting with Vite
+- Image optimization and WebP support
+- Critical CSS inlining
+- Resource preloading and prefetching
+
+### Technical SEO
+- XML sitemap generation
+- Robots.txt configuration
+- Web app manifest for PWA
+- Service worker for caching
+- HTTPS enforcement
+
+## ⚡ Performance Optimizations
+
+### Build Optimizations
+- Terser minification with console removal
+- Asset optimization and compression
+- Tree shaking for unused code
+- Bundle analysis and optimization
+
+### Runtime Optimizations
+- Intersection Observer for lazy loading
+- Debounced and throttled event handlers
+- Memory management and cleanup
+- Network status detection
+- Reduced motion support
+
+### Image Optimizations
+- WebP format support
+- Responsive images
+- Lazy loading
+- Compression and optimization
+
+## 🔒 Security Features
+
+### Form Security
+- reCAPTCHA v3 integration
+- Honeypot fields for bot detection
+- Input validation and sanitization
+- CSRF protection
+
+### Content Security
+- CSP headers
+- XSS prevention
+- Secure headers configuration
+- HTTPS enforcement
+
+## 📱 Mobile Optimization
+
+### Responsive Design
+- Mobile-first approach
+- Touch-friendly interactions
+- Optimized viewport settings
+- Progressive enhancement
+
+### Performance
+- Optimized for slow connections
+- Reduced motion support
+- Efficient animations
+- Minimal data usage
+
+## 🎨 Design System
+
+### Colors
+- Primary: `#8EB69B` (Green)
+- Secondary: `#DAF1DE` (Light Green)
+- Background: `#0B2B26` (Dark Green)
+- Text: `#FFFFFF` (White)
+
+### Typography
+- Font: Inter (Google Fonts)
+- Weights: 400, 500, 600, 700
+- Responsive sizing
+- Optimized line heights
+
+### Components
+- Consistent spacing system
+- Reusable component library
+- Accessibility-first design
+- Smooth animations
+
+## 📊 Analytics & Monitoring
+
+### Performance Monitoring
+- Core Web Vitals tracking
+- Lighthouse CI integration
+- Bundle size monitoring
+- Error tracking
+
+### SEO Monitoring
+- Google Search Console integration
+- Structured data validation
+- Meta tag validation
+- Sitemap monitoring
+
+## 🚀 Deployment
+
+### Production Build
 ```bash
 npm run build
 ```
 
-### Preview Production Build
+### Deployment Options
+- **Vercel**: Automatic deployments with preview URLs
+- **Netlify**: Continuous deployment with form handling
+- **GitHub Pages**: Static site hosting
+- **AWS S3**: Scalable cloud hosting
+
+### Environment Setup
+1. Configure domain and SSL
+2. Set up CDN for global performance
+3. Configure caching headers
+4. Set up monitoring and analytics
+
+## 📈 Performance Benchmarks
+
+### Lighthouse Scores (Target)
+- **Performance**: 95+
+- **Accessibility**: 100
+- **Best Practices**: 100
+- **SEO**: 100
+
+### Core Web Vitals
+- **LCP**: < 2.5s
+- **FID**: < 100ms
+- **CLS**: < 0.1
+
+## 🔧 Development Scripts
 
 ```bash
-npm run preview
+# Development
+npm run dev          # Start development server
+npm run build        # Build for production
+npm run preview      # Preview production build
+
+# Analysis
+npm run analyze      # Bundle analysis
+npm run lighthouse   # Performance audit
+npm run type-check   # TypeScript checking
+npm run lint         # ESLint checking
+npm run format       # Prettier formatting
 ```
 
-## Project Structure
+## 📝 Content Management
 
-```
-src/
-├── components/          # Reusable UI components
-│   ├── sections/       # Page sections (Hero, Services, etc.)
-│   ├── ui/            # Basic UI components (Buttons, Badge, etc.)
-│   └── SplashScreen.tsx # Animated splash screen
-├── assets/            # Static assets (images, icons)
-├── App.tsx           # Main application component
-└── index.tsx         # Application entry point
-```
+### SEO Content Guidelines
+- Use descriptive, keyword-rich titles
+- Write compelling meta descriptions
+- Include relevant keywords naturally
+- Optimize images with alt text
+- Create internal linking structure
 
-## Key Components
+### Performance Guidelines
+- Optimize images before upload
+- Minimize third-party scripts
+- Use lazy loading for non-critical content
+- Implement proper caching strategies
 
-### SplashScreen
-- Animated entrance with image loading
-- Fallback content if image fails to load
-- Automatic transition after 3 seconds
-- Session-based display logic
-
-### ErrorBoundary
-- Catches and handles React errors gracefully
-- Provides user-friendly error messages
-- Reload functionality for recovery
-
-### LoadingSpinner
-- Reusable loading component
-- Multiple size variants
-- Customizable colors
-
-## Performance Optimizations
-
-- **Code Splitting**: Vendor and framer-motion chunks
-- **Lazy Loading**: Suspense boundaries for better UX
-- **Image Optimization**: Proper image loading with error handling
-- **Bundle Optimization**: Terser minification and source map control
-
-## Browser Support
-
-- Chrome 90+
-- Firefox 88+
-- Safari 14+
-- Edge 90+
-
-## Contributing
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Run tests and checks
 5. Submit a pull request
 
-## License
+## 📄 License
 
-This project is licensed under the MIT License.
+MIT License - see LICENSE file for details
 
-## Troubleshooting
+## 🆘 Support
 
-### Splash Screen Not Showing
-- Clear browser session storage
-- Check browser console for errors
-- Ensure all dependencies are installed
+For support and questions:
+- Email: hello@ophiuschus.ai
+- Website: https://ophiuschus.ai
+- Documentation: [Link to docs]
 
-### Build Issues
-- Clear `node_modules` and reinstall
-- Check TypeScript configuration
-- Verify Vite configuration
+## 🔄 Updates & Maintenance
 
-### Performance Issues
-- Check bundle analyzer output
-- Optimize image sizes
-- Review component re-renders
+### Regular Maintenance Tasks
+- Update dependencies monthly
+- Monitor performance metrics
+- Review and update SEO content
+- Test across different devices
+- Monitor security vulnerabilities
+
+### Performance Monitoring
+- Set up automated Lighthouse testing
+- Monitor Core Web Vitals
+- Track user experience metrics
+- Optimize based on real user data
+
+---
+
+Built with ❤️ by Ophiuschus AI

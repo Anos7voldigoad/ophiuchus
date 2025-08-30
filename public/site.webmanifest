@@ -1,0 +1,25 @@
+{
+  "name": "Ophiuschus AI - Digital Transformation Solutions",
+  "short_name": "Ophiuschus AI",
+  "description": "Complete digital transformation solutions including website development, automation, AI voice agents, and ad management.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0B2B26",
+  "theme_color": "#8EB69B",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["business", "productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr"
+}

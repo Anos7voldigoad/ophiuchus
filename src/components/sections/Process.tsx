@@ -9,10 +9,10 @@ export default function ProcessSection() {
   const [hoveredStep, setHoveredStep] = useState<number | null>(null)
 
   const steps = [
-    { id: 1, number: '01', title: 'Discovery', description: 'We analyze your business goals and technical requirements to understand your unique needs.' },
-    { id: 2, number: '02', title: 'Strategy', description: 'Our experts craft a comprehensive roadmap and technical architecture for your AI solution.' },
-    { id: 3, number: '03', title: 'Development', description: 'We build your AI solution with clean, scalable code and seamless integration.' },
-    { id: 4, number: '04', title: 'Launch', description: 'After thorough testing, we deploy and continuously optimize your solution.' },
+    { id: 1, number: '01', title: 'Discovery', description: 'We analyze your business goals and current digital presence to understand your transformation needs.' },
+    { id: 2, number: '02', title: 'Strategy', description: 'Our experts craft a comprehensive digital transformation roadmap tailored to your business.' },
+    { id: 3, number: '03', title: 'Development', description: 'We build your complete online presence - website, automation, and digital systems.' },
+    { id: 4, number: '04', title: 'Launch', description: 'After thorough testing, we deploy your digital transformation and provide ongoing support.' },
   ]
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function ProcessSection() {
             transition={{ duration: 0.5, delay: 0.1 }}
             className="text-4xl md:text-5xl font-bold text-white mb-3"
           >
-            The Ophiuschus Way
+            Your Digital Transformation Journey
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 30 }}
@@ -134,7 +134,7 @@ export default function ProcessSection() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="text-white/70 text-lg max-w-2xl mx-auto"
           >
-            Four simple steps to transform your business with AI.
+            Four simple steps to transform your business online and scale it successfully.
           </motion.p>
         </div>
 

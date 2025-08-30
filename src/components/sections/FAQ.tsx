@@ -7,33 +7,33 @@ const FAQ: React.FC = () => {
 
   const faqs = [
     {
-      question: "How fast can we start?",
-      answer: "We can schedule a discovery call within 48 hours. Once we understand your needs, we typically kick off projects the same week. Our streamlined process means no lengthy onboarding delays.",
+      question: "How long does it take to get my business online?",
+      answer: "We can have your basic website live within 2-3 weeks. Complete digital transformation including automation and AI systems typically takes 4-6 weeks. We work quickly to get you generating revenue online as soon as possible.",
       category: "Timeline"
     },
     {
-      question: "Do I own the technology stack?",
-      answer: "Absolutely. We build exclusively on open-source tools and platforms, ensuring you maintain full control and portability. No vendor lock-in, ever.",
+      question: "Do I own my website and digital systems?",
+      answer: "Absolutely. We build everything on open-source platforms and provide you with full ownership of your website, code, and digital assets. No vendor lock-in, ever.",
       category: "Ownership"
     },
     {
-      question: "What do you need from us to get started?",
-      answer: "Just two things: access to your relevant data/channels and a single point of contact for feedback. We handle the rest, keeping you informed every step of the way.",
-      category: "Requirements"
+      question: "What if I don't have technical knowledge?",
+      answer: "No problem! We handle all the technical aspects and provide you with simple, user-friendly dashboards to manage your online presence. We also offer training and ongoing support.",
+      category: "Technical"
     },
     {
-      question: "Can you work with our existing team?",
-      answer: "Yes! We're designed to collaborate seamlessly with in-house teams and agencies. We integrate with your existing workflows, not replace them.",
-      category: "Collaboration"
+      question: "Can you work with my existing business processes?",
+      answer: "Yes! We analyze your current operations and design digital solutions that enhance your existing workflows, not replace them. We integrate with your current systems and processes.",
+      category: "Integration"
     },
     {
-      question: "How do you ensure quality and reliability?",
-      answer: "We follow enterprise-grade development practices with comprehensive testing, code reviews, and continuous monitoring. Every solution includes ongoing support and optimization.",
-      category: "Quality"
+      question: "How do you ensure my online business is secure?",
+      answer: "We implement enterprise-grade security measures including SSL certificates, secure payment processing, data encryption, and regular security updates. Your business and customer data are protected.",
+      category: "Security"
     },
     {
-      question: "What if we need changes after launch?",
-      answer: "We provide 30 days of post-launch support and can implement adjustments quickly. For ongoing needs, we offer flexible maintenance packages.",
+      question: "What ongoing support do you provide?",
+      answer: "We provide 30 days of post-launch support and offer flexible maintenance packages for ongoing updates, security patches, and feature additions. We're here to ensure your online success.",
       category: "Support"
     }
   ];
@@ -54,8 +54,8 @@ const FAQ: React.FC = () => {
         >
           <SectionTitle 
             eyebrow="FAQ" 
-            title="Common Questions" 
-            subtitle="Everything you need to know about working with us." 
+            title="Going Online Questions" 
+            subtitle="Everything you need to know about transforming your business digitally." 
           />
         </motion.div>
 
