@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import viperr from "../assets/viperr.png";
+import { PrimaryBtn } from "./ui";
 
 type ContactMethod = "email" | "phone";
 
@@ -9,313 +9,394 @@ interface ConsultationModalProps {
   onClose: () => void;
 }
 
-// Optional Google Forms integration
-// Source form (preview): https://docs.google.com/forms/d/e/1FAIpQLSe7cd6_3UFHYEg-eGwDoHFEX7-MJQ4ynE3TxHY4tVLN-QWFZg/viewform
-// Submission endpoint must use formResponse (not viewform)
-const GOOGLE_FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSe7cd6_3UFHYEg-eGwDoHFEX7-MJQ4ynE3TxHY4tVLN-QWFZg/formResponse";
-// Optional Apps Script JSON endpoint (preferred). Set to your deployed Web App URL, e.g.:
-// const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_DEPLOYED_URL_HERE/exec";
-const GOOGLE_APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzkyjtEpZknr9Ai6dgLp5XCZyP0IdL74mwfLOUamzJBi0C7gzMOvyXhNUGD6un_DQ0d/exec";
-const GOOGLE_FORM_ENTRIES = {
-  name: "entry.665165831",
-  email: "entry.132634577",
-  business: "entry.269460461",
-  service: "entry.1895920993",
-  contactMethod: "entry.412173692",
-  phone: "entry.1358709874",
-  // date and time are special Google Form types that want split fields
-  date: "entry.1200147961",
-  time: "entry.501833383",
-  message: "entry.645572225"
-};
-
 const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }) => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [business, setBusiness] = useState("");
-  const [service, setService] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [contactMethod, setContactMethod] = useState<ContactMethod>("email");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
-  const [attempted, setAttempted] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [submitError, setSubmitError] = useState("");
-  const useAppsScriptNativePost = Boolean(GOOGLE_APPS_SCRIPT_URL);
+  const [formData, setFormData] = useState({
+    name: "",
+    gmail: "",
+    businessName: "",
+    service: "",
+    date: "",
+    time: "",
+    contactMethod: "email" as ContactMethod,
+    phone: "",
+    message: "",
+    botField: "" // honeypot field
+  });
 
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [onClose]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [status, setStatus] = useState("");
 
-  // Debug helper: run `testSubmit()` in DevTools to send a sample submission
-  useEffect(() => {
-    // @ts-ignore attach for debugging only
-    (window as any).testSubmit = () => {
-      const fd = new FormData();
-      fd.append("entry.665165831", "Test Name");
-      fd.append("entry.132634577", "test@example.com");
-      fd.append("entry.1200147961_year", "2025");
-      fd.append("entry.1200147961_month", "08");
-      fd.append("entry.1200147961_day", "29");
-      fd.append("entry.501833383_hour", "10");
-      fd.append("entry.501833383_minute", "15");
-      fd.append("entry.501833383_ampm", "AM");
-      fd.append("entry.645572225", "Just testing");
-      console.log("Sending test submission...");
-      fetch(GOOGLE_FORM_ACTION, { method: "POST", mode: "no-cors", body: fd });
-    };
-    return () => { try { delete (window as any).testSubmit; } catch {} };
-  }, []);
-
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("🧪 Submit handler triggered");
-    setAttempted(true);
-    const missingRequired = !name || !email || !service || (contactMethod === "phone" && !phone);
-    if (missingRequired) return;
-    // Build payload via Apps Script / Google Forms only (no email fallback)
-    // Prefer Apps Script JSON endpoint if provided
-    if (GOOGLE_APPS_SCRIPT_URL) {
-      const payload = {
-        name,
-        gmail: email,
-        business,
-        service,
-        contact: contactMethod,
-        date,
-        time,
-        notes: message,
-        phone
-      };
-      try {
-        // Debug: log payload and response text
-        console.log("Sending to Apps Script:", JSON.stringify(payload));
-        const response = await fetch(GOOGLE_APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const text = await response.text().catch(() => "");
-        if (text) console.log("Response from Apps Script:", text);
-        setSubmitted(true);
-        setTimeout(() => { setSubmitted(false); onClose(); }, 1200);
-        return;
-      } catch (err) {
-        console.error('Apps Script submission failed:', err);
-        // Fall through to Google Forms fallback
-      }
-    }
-
-    if (GOOGLE_FORM_ACTION && GOOGLE_FORM_ENTRIES.name) {
-      // More reliable cross-origin submission using a temporary form element
-      const form = document.createElement('form');
-      form.method = 'POST';
-      form.action = GOOGLE_FORM_ACTION;
-      form.target = '_self';
-      form.style.position = 'fixed';
-      form.style.left = '-9999px';
-
-      const append = (name: string, value: string | undefined) => {
-        if (!name || value == null || value === '') return;
-        const input = document.createElement('input');
-        input.type = 'hidden';
-        input.name = name;
-        input.value = value;
-        form.appendChild(input);
-      };
-
-      append(GOOGLE_FORM_ENTRIES.name, name);
-      append(GOOGLE_FORM_ENTRIES.email, email);
-      append(GOOGLE_FORM_ENTRIES.business, business);
-      append(GOOGLE_FORM_ENTRIES.service, service);
-      append(GOOGLE_FORM_ENTRIES.contactMethod, contactMethod);
-      if (contactMethod === 'phone') append(GOOGLE_FORM_ENTRIES.phone, phone);
-
-      if (date) {
-        const [yyyy, mm, dd] = date.split('-');
-        append('entry.1200147961_month', mm || '');
-        append('entry.1200147961_day', dd || '');
-        append('entry.1200147961_year', yyyy || '');
-      }
-      if (time) {
-        const [hhStr, minStr] = time.split(':');
-        let hh = parseInt(hhStr || '0', 10);
-        let ampm = 'AM';
-        if (hh >= 12) { ampm = 'PM'; if (hh > 12) hh -= 12; }
-        else if (hh === 0) { hh = 12; }
-        append('entry.501833383_hour', String(hh));
-        append('entry.501833383_minute', minStr || '00');
-        append('entry.501833383_ampm', ampm);
-      }
-      append(GOOGLE_FORM_ENTRIES.message, message);
-      // extras
-      append('fvv', '1');
-      append('draftResponse', '[]');
-      append('pageHistory', '0');
-      append('submit', 'Submit');
-
-      document.body.appendChild(form);
-      try {
-        console.log('Submitting via form element...');
-        form.submit();
-        setSubmitted(true);
-        setTimeout(() => {
-          setSubmitted(false);
-          onClose();
-          try { document.body.removeChild(form); } catch {}
-        }, 1200);
-        return;
-      } catch (err) {
-        console.error('Form element submission failed:', err);
-        try { document.body.removeChild(form); } catch {}
-      }
-    }
-    // No Gmail fallback. Show a non-intrusive error toast instead.
-    setSubmitError("Submission failed. Please try again or contact us by email.");
-    setTimeout(() => setSubmitError(""), 2500);
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Native POST to Apps Script using browser form submission (no JS fetch)
-  const nativeSubmit = (e: React.FormEvent) => {
-    console.log("🧪 Native submit triggered");
-    setAttempted(true);
-    const missingRequired = !name || !email || !service || (contactMethod === "phone" && !phone);
-    if (missingRequired) {
-      e.preventDefault();
-      return;
+const SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc"; // reCAPTCHA v3 site key
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw75BF6ItpCU90ZFnSnpnUAhBV8BBPMUFVbl6w7IFBVYL21YXfhDcjuU3dvhgN66BKe8A/exec";
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+
+  // Honeypot
+  if (formData.botField) return;
+
+  setIsSubmitting(true);
+  setStatus("");
+
+  try {
+    // Get reCAPTCHA v3 token
+    const token = await new Promise<string>((resolve, reject) => {
+      // @ts-ignore
+      window.grecaptcha.ready(() => {
+        // @ts-ignore
+        window.grecaptcha
+          .execute(SITE_KEY, { action: "submit" })
+          .then((token: string) => {
+            console.log("Generated token:", token); // Debug log
+            resolve(token);
+          })
+          .catch(reject);
+      });
+    });
+
+    // Build URL-encoded body (no custom headers -> no CORS preflight)
+    const body = new URLSearchParams();
+    body.set("name", formData.name);
+    body.set("gmail", formData.gmail);               // <-- map email -> gmail (your sheet header)
+    body.set("business", formData.businessName);
+    body.set("service", formData.service);
+    body.set("date", formData.date);
+    body.set("time", formData.time);
+    body.set("contactMethod", formData.contactMethod);
+    body.set("phone", formData.contactMethod === "phone" ? formData.phone : "");
+    body.set("message", formData.message);
+    body.set("botField", formData.botField);
+    body.set("token", token);
+
+    const res = await fetch(APPS_SCRIPT_URL, {
+      method: "POST",
+      body, // IMPORTANT: no headers -> browser sets x-www-form-urlencoded and avoids preflight
+    });
+
+    const json = await res.json().catch(() => ({}));
+
+    if (res.ok && json.success) {
+      setStatus("success");
+      setFormData({
+        name: "",
+        gmail: "",
+        businessName: "",
+        service: "",
+        date: "",
+        time: "",
+        contactMethod: "email",
+        phone: "",
+        message: "",
+        botField: "",
+      });
+      setTimeout(() => {
+        onClose();
+        setStatus("");
+      }, 2000);
+    } else {
+      console.error("Apps Script error:", json);
+      setStatus("error");
     }
-    // Let the browser submit the form to GOOGLE_APPS_SCRIPT_URL
+  } catch (err) {
+    console.error(err);
+    setStatus("error");
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      gmail: "",
+      businessName: "",
+      service: "",
+      date: "",
+      time: "",
+      contactMethod: "email",
+      phone: "",
+      message: "",
+      botField: ""
+    });
+    setStatus("");
   };
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div className="fixed inset-0 z-[100] flex items-center justify-center p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-          <motion.div initial={{ opacity: 0, y: 24, scale: 0.98 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ duration: 0.25, ease: [0.25, 0.46, 0.45, 0.94] }} className="relative z-[101] w-full max-w-xl rounded-2xl border border-white/15 bg-white/10 backdrop-blur-xl p-6 sm:p-7 text-white shadow-[0_8px_40px_rgba(0,0,0,0.35)]">
-            <div className="mb-5 flex items-center gap-2">
-              <div className="flex h-9 w-9 items-center justify-center overflow-hidden rounded-xl bg-gradient-to-br from-[#8EB69B] to-[#DAF1DE] shadow">
-                <img src={viperr} alt="logo" className="h-6 w-6 object-contain" />
-              </div>
-              <div>
-                <h3 className="text-2xl font-semibold tracking-tight">Book a consultation</h3>
-                <p className="text-white/70 text-sm">No obligation. 20 minutes.</p>
-              </div>
-            </div>
-            <form
-              onSubmit={useAppsScriptNativePost ? nativeSubmit : submit}
-              action={useAppsScriptNativePost ? GOOGLE_APPS_SCRIPT_URL : undefined}
-              method={useAppsScriptNativePost ? 'POST' : undefined}
-              target={useAppsScriptNativePost ? '_blank' : undefined}
-              className="grid grid-cols-1 gap-4 sm:grid-cols-2"
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm z-50 p-4"
+          onClick={onClose}
+        >
+                      <motion.div
+              initial={{ scale: 0.9, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 20 }}
+              transition={{ duration: 0.3, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin"
+              onClick={(e) => e.stopPropagation()}
             >
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[13px] font-medium text-white/80">Name <span className="text-[#8EB69B]">*</span></span>
-                <input name="name" required placeholder="Jane Doe" className={`rounded-xl border bg-white/5 px-3.5 py-2.5 text-[15px] outline-none transition focus:border-[#8EB69B] focus:bg-white/10 ${attempted && !name ? 'border-rose-400/60' : 'border-white/20'}`} value={name} onChange={(e) => setName(e.target.value)} />
-                {attempted && !name && <span className="text-[12px] text-rose-300">Name is required.</span>}
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[13px] font-medium text-white/80">Email (Gmail) <span className="text-[#8EB69B]">*</span></span>
-                <input name="gmail" required type="email" placeholder="you@gmail.com" className={`rounded-xl border bg-white/5 px-3.5 py-2.5 text-[15px] outline-none transition focus:border-[#8EB69B] focus:bg-white/10 ${attempted && !email ? 'border-rose-400/60' : 'border-white/20'}`} value={email} onChange={(e) => setEmail(e.target.value)} />
-                {attempted && !email && <span className="text-[12px] text-rose-300">Email is required.</span>}
-              </label>
-              <label className="flex flex-col gap-1.5 sm:col-span-2">
-                <span className="text-[13px] font-medium text-white/80">Business name</span>
-                <input name="business" placeholder="Ophiuschus AI" className="rounded-xl border border-white/20 bg-white/5 px-3.5 py-2.5 text-[15px] outline-none transition focus:border-[#8EB69B] focus:bg-white/10" value={business} onChange={(e) => setBusiness(e.target.value)} />
-              </label>
-              <label className="flex flex-col gap-1.5 sm:col-span-2">
-                <span className="text-[13px] font-medium text-white/80">Service of interest <span className="text-[#8EB69B]">*</span></span>
-                <input name="service" required placeholder="Chatbots, Ads, Automation…" className={`rounded-xl border bg-white/5 px-3.5 py-2.5 text-[15px] outline-none transition focus:border-[#8EB69B] focus:bg-white/10 ${attempted && !service ? 'border-rose-400/60' : 'border-white/20'}`} value={service} onChange={(e) => setService(e.target.value)} />
-                {attempted && !service && <span className="text-[12px] text-rose-300">Service is required.</span>}
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[13px] font-medium text-white/80">Preferred date</span>
-                <input name="date" type="date" className="rounded-xl border border-white/20 bg-white/5 px-3.5 py-2.5 text-[15px] outline-none transition focus:border-[#8EB69B] focus:bg-white/10" value={date} onChange={(e) => setDate(e.target.value)} />
-              </label>
-              <label className="flex flex-col gap-1.5">
-                <span className="text-[13px] font-medium text-white/80">Preferred time</span>
-                <input name="time" type="time" className="rounded-xl border border-white/20 bg-white/5 px-3.5 py-2.5 text-[15px] outline-none transition focus:border-[#8EB69B] focus:bg-white/10" value={time} onChange={(e) => setTime(e.target.value)} />
-              </label>
-              <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <label
-                  className={`${contactMethod === "email" ?
-                    "border-[#8EB69B]/60 bg-[#8EB69B]/15 shadow-[0_0_24px_rgba(142,182,155,0.45)]" :
-                    "border-white/10 bg-white/5 hover:bg-white/10"} group flex items-center gap-2 rounded-xl border px-3 py-2 transition`}
-                >
-                  <input type="radio" name="contactMethod" checked={contactMethod === "email"} onChange={() => setContactMethod("email")} />
-                  <span className="text-[14px]">Contact by email</span>
-                  {contactMethod === "email" && (
-                    <svg className="ml-auto h-4 w-4 text-[#8EB69B]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
-                  )}
-                </label>
-                <label
-                  className={`${contactMethod === "phone" ?
-                    "border-[#8EB69B]/60 bg-[#8EB69B]/15 shadow-[0_0_24px_rgba(142,182,155,0.45)]" :
-                    "border-white/10 bg-white/5 hover:bg-white/10"} group flex items-center gap-2 rounded-xl border px-3 py-2 transition`}
-                >
-                  <input type="radio" name="contactMethod" checked={contactMethod === "phone"} onChange={() => setContactMethod("phone")} />
-                  <span className="text-[14px]">Contact by phone</span>
-                  {contactMethod === "phone" && (
-                    <svg className="ml-auto h-4 w-4 text-[#8EB69B]" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"/></svg>
-                  )}
-                </label>
-                {contactMethod === "phone" && (
-                  <div className="flex flex-col gap-1.5">
-                    <input name="phone" placeholder="Phone number" className={`rounded-xl border bg-white/5 px-3.5 py-2.5 text-[15px] outline-none transition focus:border-[#8EB69B] focus:bg-white/10 ${attempted && !phone ? 'border-rose-400/60' : 'border-white/20'}`} value={phone} onChange={(e) => setPhone(e.target.value)} />
-                    {attempted && !phone && <span className="text-[12px] text-rose-300">Phone is required for phone contact.</span>}
+            {/* Enhanced glassmorphism background effects */}
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-[#8EB69B]/15 to-[#DAF1DE]/10 blur-2xl" />
+            <div className="absolute inset-0 rounded-3xl bg-gradient-to-tl from-[#163832]/20 to-transparent" />
+            <div className="absolute -inset-1 rounded-3xl bg-gradient-to-r from-[#8EB69B]/20 via-transparent to-[#DAF1DE]/20 blur-lg opacity-50" />
+            
+            <div className="relative bg-gradient-to-br from-[#0B2B26]/80 to-[#163832]/90 border border-[#8EB69B]/30 rounded-3xl shadow-2xl backdrop-blur-2xl">
+                              {/* Header with enhanced glassmorphism */}
+                <div className="flex items-center justify-between p-6 border-b border-[#8EB69B]/20 bg-gradient-to-r from-[#8EB69B]/5 to-transparent backdrop-blur-sm">
+                  <div>
+                    <h2 className="text-2xl font-semibold text-white drop-shadow-sm">Book a Consultation</h2>
+                    <p className="text-sm text-white/70 mt-1 drop-shadow-sm">Let's discuss your AI automation needs</p>
+                  </div>
+                  <button
+                    onClick={onClose}
+                    className="text-white/60 hover:text-white transition-all duration-200 p-2 rounded-full hover:bg-white/10 hover:shadow-lg hover:shadow-[#8EB69B]/20 backdrop-blur-sm"
+                    aria-label="Close modal"
+                  >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+
+              {/* Form with glassmorphism effects */}
+              <form 
+                onSubmit={handleSubmit} 
+                className="p-6 space-y-3 bg-gradient-to-b from-transparent to-[#8EB69B]/5 backdrop-blur-sm"
+              >
+                {/* Honeypot field */}
+                <input
+                  type="text"
+                  name="botField"
+                  value={formData.botField}
+                  onChange={handleChange}
+                  style={{ display: "none" }}
+                  tabIndex={-1}
+                />
+
+                {/* Name and Email in a row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-white/90 mb-1">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      placeholder="Enter your full name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-sm font-medium text-white/90 mb-1">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      id="gmail"
+                      name="gmail"
+                      placeholder="your@gmail.com"
+                      value={formData.gmail}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                    />
+                  </div>
+                </div>
+
+                {/* Business Name and Service in a row */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="businessName" className="block text-sm font-medium text-white/90 mb-1">
+                      Business Name
+                    </label>
+                    <input
+                      type="text"
+                      id="businessName"
+                      name="businessName"
+                      placeholder="Your company name"
+                      value={formData.businessName}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="service" className="block text-sm font-medium text-white/90 mb-1">
+                      Service of Interest
+                    </label>
+                    <select
+                      id="service"
+                      name="service"
+                      value={formData.service}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                    >
+                      <option value="">Select a service</option>
+                      <option value="chatbot">AI Chatbot Development</option>
+                      <option value="automation">Workflow Automation</option>
+                      <option value="ads">Meta/Google Ads Management</option>
+                      <option value="consulting">AI Strategy Consulting</option>
+                      <option value="custom">Custom AI Solution</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* Date and Time */}
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label htmlFor="date" className="block text-sm font-medium text-white/90 mb-1">
+                      Preferred Date
+                    </label>
+                    <input
+                      type="date"
+                      id="date"
+                      name="date"
+                      value={formData.date}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                    />
+                  </div>
+                  <div>
+                    <label htmlFor="time" className="block text-sm font-medium text-white/90 mb-1">
+                      Preferred Time
+                    </label>
+                    <input
+                      type="time"
+                      id="time"
+                      name="time"
+                      value={formData.time}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                    />
+                  </div>
+                </div>
+
+                {/* Contact Method */}
+                <div>
+                  <label className="block text-sm font-medium text-white/90 mb-2">
+                    Preferred Contact Method
+                  </label>
+                  <div className="flex gap-4">
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="contactMethod"
+                        value="email"
+                        checked={formData.contactMethod === "email"}
+                        onChange={handleChange}
+                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/30 focus:ring-[#8EB69B]/50"
+                      />
+                      <span className="ml-2 text-white/90 text-sm">Email</span>
+                    </label>
+                    <label className="flex items-center">
+                      <input
+                        type="radio"
+                        name="contactMethod"
+                        value="phone"
+                        checked={formData.contactMethod === "phone"}
+                        onChange={handleChange}
+                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/30 focus:ring-[#8EB69B]/50"
+                      />
+                      <span className="ml-2 text-white/90 text-sm">Phone</span>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Phone Number (conditional) */}
+                {formData.contactMethod === "phone" && (
+                  <div>
+                    <label htmlFor="phone" className="block text-sm font-medium text-white/90 mb-1">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      placeholder="+1 (555) 123-4567"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all text-sm backdrop-blur-sm shadow-inner"
+                    />
                   </div>
                 )}
-                {/* Hidden field matching Apps Script expected key */}
-                <input type="hidden" name="contact" value={contactMethod} />
-              </div>
-              <label className="flex flex-col gap-1.5 sm:col-span-2">
-                <span className="text-[13px] font-medium text-white/80">Message / notes</span>
-                <textarea name="notes" rows={4} placeholder="Tell us a bit about your goals…" className="rounded-xl border border-white/20 bg-white/5 px-3.5 py-2.5 text-[15px] outline-none transition focus:border-[#8EB69B] focus:bg-white/10" value={message} onChange={(e) => setMessage(e.target.value)} />
-              </label>
 
-              <div className="sm:col-span-2 mt-2 flex items-center justify-end gap-3">
-                <button type="button" onClick={onClose} className="rounded-xl border border-white/20 px-4 py-2.5 text-[14px] text-white/85 hover:bg-white/10">Cancel</button>
-                <button type="submit" onClick={() => console.log("🚀 Submit button clicked")} className="rounded-xl bg-[#8EB69B] px-5 py-2.5 text-[14px] font-semibold text-black hover:bg-[#8EB69B]/90">Submit</button>
-              </div>
-            </form>
+                {/* Message */}
+                <div>
+                  <label htmlFor="message" className="block text-sm font-medium text-white/90 mb-1">
+                    Project Details
+                  </label>
+                  <textarea
+                    id="message"
+                    name="message"
+                    placeholder="Tell us about your project, goals, and requirements..."
+                    value={formData.message}
+                    onChange={handleChange}
+                    rows={3}
+                    className="w-full px-3 py-2 bg-[#0B2B26]/40 border border-[#8EB69B]/30 rounded-2xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/50 focus:border-[#8EB69B] transition-all resize-none text-sm backdrop-blur-sm shadow-inner"
+                  />
+                </div>
+
+
+
+                {/* Submit Button */}
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="w-full inline-flex items-center justify-center rounded-2xl bg-gradient-to-r from-[#8EB69B] to-[#DAF1DE] px-6 py-3 text-sm font-semibold text-black shadow-lg shadow-[#8EB69B]/30 transition hover:from-[#7AA68A] hover:to-[#C5E5CC] focus:outline-none focus:ring-2 focus:ring-[#DAF1DE] focus:ring-offset-2 focus:ring-offset-[#8EB69B] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-black" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                      Submitting...
+                    </>
+                  ) : (
+                    "Book Consultation"
+                  )}
+                </button>
+
+                {/* Status Messages with glassmorphism */}
+                {status === "success" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-3 bg-[#8EB69B]/20 border border-[#8EB69B]/30 rounded-2xl text-[#DAF1DE] text-sm text-center backdrop-blur-sm shadow-lg shadow-[#8EB69B]/20"
+                  >
+                    ✅ Consultation request submitted successfully! We'll be in touch soon.
+                  </motion.div>
+                )}
+
+                {status === "error" && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="p-3 bg-red-500/20 border border-red-500/30 rounded-2xl text-red-300 text-sm text-center backdrop-blur-sm shadow-lg shadow-red-500/20"
+                  >
+                    ❌ Something went wrong. Please try again or contact us directly.
+                  </motion.div>
+                )}
+              </form>
+            </div>
           </motion.div>
-          <AnimatePresence>
-            {submitted && (
-              <motion.div
-                role="status"
-                aria-live="polite"
-                className="pointer-events-none fixed bottom-6 left-1/2 z-[102] -translate-x-1/2 rounded-xl border border-white/15 bg-white/15 px-4 py-2 text-sm text-white backdrop-blur-md shadow-lg"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-              >
-                Submitted! We'll be in touch shortly.
-              </motion.div>
-            )}
-            {submitError && (
-              <motion.div
-                role="status"
-                aria-live="polite"
-                className="pointer-events-none fixed bottom-6 left-1/2 z-[102] -translate-x-1/2 rounded-xl border border-rose-300/20 bg-rose-400/20 px-4 py-2 text-sm text-rose-100 backdrop-blur-md shadow-lg"
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 8 }}
-              >
-                {submitError}
-              </motion.div>
-            )}
-          </AnimatePresence>
         </motion.div>
       )}
     </AnimatePresence>
   );
-}
+};
 
 export default ConsultationModal;
-
 
