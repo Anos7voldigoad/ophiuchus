@@ -32,7 +32,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
   };
 
 const SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc"; // reCAPTCHA v3 site key
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxmkxE8NJxBgq6OxYKZbnVK_z7BgCGMKa77TfNYHed0DHeeS9LVpvG-94WWB2SxG8q_jw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwZukA5er2vEDPuKj3uHiw_YpZ8HWmIysNU3JNNXFBh0OnEZ04Q_8qc-zdHD8srzOt37g/exec";
 
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
@@ -112,18 +112,8 @@ const handleSubmit = async (e: React.FormEvent) => {
 };
 
   const resetForm = () => {
-    setFormData({
-      name: "",
-      gmail: "",
-      businessName: "",
-      service: "",
-      date: "",
-      time: "",
-      contactMethod: "email",
-      phone: "",
-      message: "",
-      botField: ""
-    });
+    
+    
     setStatus("");
   };
 
