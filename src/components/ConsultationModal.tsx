@@ -59,26 +59,23 @@ const handleSubmit = async (e: React.FormEvent) => {
       });
     });
 
-    const formDataToSend = {
-      name: formData.name,
-      gmail: formData.gmail,
-      business: formData.businessName,
-      service: formData.service,
-      contactMethod: formData.contactMethod,
-      date: formData.date,
-      time: formData.time,
-      message: formData.message,
-      phone: formData.contactMethod === "phone" ? formData.phone : "",
-      botField: formData.botField,
-      token: token
-    };
+    // Build URL-encoded body (no custom headers -> no CORS preflight)
+    const body = new URLSearchParams();
+    body.set("name", formData.name);
+    body.set("gmail", formData.gmail);
+    body.set("business", formData.businessName);
+    body.set("service", formData.service);
+    body.set("date", formData.date);
+    body.set("time", formData.time);
+    body.set("contactMethod", formData.contactMethod);
+    body.set("phone", formData.contactMethod === "phone" ? formData.phone : "");
+    body.set("message", formData.message);
+    body.set("botField", formData.botField);
+    body.set("token", token);
 
     const response = await fetch(APPS_SCRIPT_URL, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json", // 🔑 VERY IMPORTANT
-      },
-      body: JSON.stringify(formDataToSend), // 🔑 send JSON
+      body: body // IMPORTANT: no headers -> browser sets x-www-form-urlencoded and avoids preflight
     });
 
     const result = await response.json();
