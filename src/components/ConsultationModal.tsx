@@ -10,7 +10,7 @@ interface ConsultationModalProps {
 
 // reCAPTCHA configuration
 const RECAPTCHA_SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlSmnMaQos27HGofhRABI9vn1KP0HEAGVwufO7Hpnur_EGv6tlGdBwu5mqyuMJVNawWg/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzO6wlrgqkgySe_JBcQ1rxCcicycflWVK9eE568To-x-IXzGLkuJAgTcTyOdGYRFmw/exec";
 
 const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -44,7 +44,24 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    
+    // Special handling for contact method changes
+    if (name === "contactMethod") {
+      setFormData((prev) => {
+        const newData = { ...prev, [name]: value as ContactMethod };
+        
+        // Clear date, time, and phone when switching to email
+        if (value === "email") {
+          newData.date = "";
+          newData.time = "";
+          newData.phone = "";
+        }
+        
+        return newData;
+      });
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const getRecaptchaToken = async (): Promise<string> => {
@@ -82,10 +99,18 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
       return;
     }
 
-    // Validation
+    // Enhanced validation with conditional fields
     if (!formData.name.trim() || !formData.gmail.trim()) {
       setStatus("error");
       return;
+    }
+
+    // Validate phone-specific fields when phone is selected
+    if (formData.contactMethod === "phone") {
+      if (!formData.phone.trim() || !formData.date || !formData.time) {
+        setStatus("error");
+        return;
+      }
     }
 
     setIsSubmitting(true);
@@ -101,8 +126,8 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
       body.set("gmail", formData.gmail.trim());
       body.set("businessName", formData.businessName.trim());
       body.set("service", formData.service);
-      body.set("date", formData.date);
-      body.set("time", formData.time);
+      body.set("date", formData.contactMethod === "phone" ? formData.date : "");
+      body.set("time", formData.contactMethod === "phone" ? formData.time : "");
       body.set("contactMethod", formData.contactMethod);
       body.set("phone", formData.contactMethod === "phone" ? formData.phone.trim() : "");
       body.set("message", formData.message.trim());
@@ -324,46 +349,70 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                   </motion.div>
                 </div>
 
-                {/* Date and Time */}
-                <div className="grid grid-cols-2 gap-4">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <label htmlFor="date" className="block text-sm font-semibold text-white/90 mb-2">
-                      Preferred Date
-                    </label>
-                    <input
-                      type="date"
-                      id="date"
-                      name="date"
-                      value={formData.date}
-                      onChange={handleChange}
-                      min={new Date().toISOString().split('T')[0]}
-                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
-                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
-                    />
-                  </motion.div>
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                  >
-                    <label htmlFor="time" className="block text-sm font-semibold text-white/90 mb-2">
-                      Preferred Time
-                    </label>
-                    <input
-                      type="time"
-                      id="time"
-                      name="time"
-                      value={formData.time}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
-                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
-                    />
-                  </motion.div>
-                </div>
+                {/* Date and Time - Only shown when phone is selected */}
+                <AnimatePresence>
+                  {formData.contactMethod === "phone" && (
+                    <motion.div 
+                      className="space-y-3"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      {/* Helpful hint */}
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.3, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+                        className="text-xs text-[#8EB69B]/80 text-center bg-[#8EB69B]/10 border border-[#8EB69B]/20 rounded-lg px-3 py-2 backdrop-blur-sm"
+                      >
+                        📞 Phone consultations require scheduling. Please select your preferred date and time.
+                      </motion.div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <label htmlFor="date" className="block text-sm font-semibold text-white/90 mb-2">
+                            Preferred Date *
+                          </label>
+                          <input
+                            type="date"
+                            id="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleChange}
+                            min={new Date().toISOString().split('T')[0]}
+                            required={formData.contactMethod === "phone"}
+                            className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                            style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
+                          />
+                        </motion.div>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <label htmlFor="time" className="block text-sm font-semibold text-white/90 mb-2">
+                            Preferred Time *
+                          </label>
+                          <input
+                            type="time"
+                            id="time"
+                            name="time"
+                            value={formData.time}
+                            onChange={handleChange}
+                            required={formData.contactMethod === "phone"}
+                            className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                            style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
+                          />
+                        </motion.div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
 
                 {/* Contact Method */}
                 <motion.div
@@ -398,6 +447,19 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       <span className="ml-2 text-white/90 text-sm font-medium">Phone</span>
                     </label>
                   </div>
+                  
+                  {/* Contact method hint */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="mt-3 text-xs text-[#8EB69B]/70 text-center"
+                  >
+                    {formData.contactMethod === "email" 
+                      ? "📧 Email consultations are flexible - we'll respond within 24 hours"
+                      : "📞 Phone consultations require scheduling - select your preferred time below"
+                    }
+                  </motion.div>
                 </motion.div>
 
                 {/* Phone Number (conditional) */}
@@ -519,4 +581,5 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
 };
 
 export default ConsultationModal;
+
 
