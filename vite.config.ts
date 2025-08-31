@@ -5,6 +5,7 @@ import { resolve } from 'path'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  base: '/',
   server: {
     port: 3000,
     open: false,
@@ -17,12 +18,22 @@ export default defineConfig({
     target: 'es2015',
     rollupOptions: {
       output: {
-        manualChunks: {
-          vendor: ['react', 'react-dom'],
-          framer: ['framer-motion'],
-          utils: ['react', 'react-dom']
+        manualChunks: (id) => {
+          // Vendor chunks for better caching
+          if (id.includes('node_modules')) {
+            if (id.includes('react') || id.includes('react-dom')) {
+              return 'vendor-react'
+            }
+            if (id.includes('framer-motion')) {
+              return 'vendor-framer'
+            }
+            return 'vendor'
+          }
         },
-        chunkFileNames: 'assets/js/[name]-[hash].js',
+        chunkFileNames: (chunkInfo) => {
+          const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk'
+          return `assets/js/[name]-[hash].js`
+        },
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
           const info = assetInfo.name.split('.')
@@ -43,7 +54,15 @@ export default defineConfig({
         drop_debugger: true,
         pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn']
       }
-    }
+    },
+    // Ensure proper chunk loading
+    chunkSizeWarningLimit: 1000,
+    // Better source map handling
+    sourcemap: false,
+    // Optimize for production
+    cssCodeSplit: true,
+    // Ensure assets are properly referenced
+    assetsInlineLimit: 4096
   },
   optimizeDeps: {
     include: ['react', 'react-dom', 'framer-motion'],
