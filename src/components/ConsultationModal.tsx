@@ -10,7 +10,7 @@ interface ConsultationModalProps {
 
 // reCAPTCHA configuration
 const RECAPTCHA_SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwlSmnMaQos27HGofhRABI9vn1KP0HEAGVwufO7Hpnur_EGv6tlGdBwu5mqyuMJVNawWg/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzO6wlrgqkgySe_JBcQ1rxCcicycflWVK9eE568To-x-IXzGLkuJAgTcTyOdGYRFmw/exec";
 
 const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
