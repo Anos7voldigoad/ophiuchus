@@ -134,7 +134,10 @@ const FAQ: React.FC = () => {
             <p className="text-white/60 mb-4 max-w-md">
               We're here to help. Schedule a call and we'll answer everything in detail.
             </p>
-            <button className="px-6 py-3 bg-[#8EB69B] text-black font-medium rounded-lg hover:bg-[#8EB69B]/90 transition-colors">
+            <button 
+              className="px-6 py-3 bg-[#8EB69B] text-black font-medium rounded-lg hover:bg-[#8EB69B]/90 transition-colors"
+              onClick={() => window.dispatchEvent(new Event('open-consultation'))}
+            >
               Schedule a Call
             </button>
           </div>

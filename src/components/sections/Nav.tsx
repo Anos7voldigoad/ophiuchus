@@ -50,7 +50,6 @@ const Nav: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.1 + 0.4, ease: [0.16, 1, 0.3, 1] }}
               whileHover={{ y: -2 }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
             >
               {item}
             </motion.a>

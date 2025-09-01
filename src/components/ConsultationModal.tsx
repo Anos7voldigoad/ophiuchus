@@ -10,7 +10,7 @@ interface ConsultationModalProps {
 
 // reCAPTCHA configuration
 const RECAPTCHA_SITE_KEY = "6LcRrrcrAAAAAFsPoitByrEX6gd6PBgbRfmm_yuc";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzO6wlrgqkgySe_JBcQ1rxCcicycflWVK9eE568To-x-IXzGLkuJAgTcTyOdGYRFmw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxKFhzbv0aJUu-1GRx_RQ0w1j-S68fh0k1PU4-RTmQNCmKP-715wVTscgVFDGxoPOnGqg/exec";
 
 const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -189,7 +189,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-md z-50 p-4"
+          className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-md z-50 p-2 sm:p-4"
           onClick={onClose}
         >
           <motion.div
@@ -197,7 +197,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 30 }}
             transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto scrollbar-thin"
+            className="relative w-full max-w-[95vw] sm:max-w-xl md:max-w-2xl lg:max-w-3xl max-h-[95vh] sm:max-h-[90vh] md:max-h-[85vh] overflow-y-auto scrollbar-thin mx-2 sm:mx-0"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Enhanced background with neon effects */}
@@ -212,33 +212,34 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
               
               {/* Header with enhanced glassmorphism */}
               <motion.div 
-                className="relative flex items-center justify-between p-6 border-b border-[#8EB69B]/30 bg-gradient-to-r from-[#8EB69B]/10 to-transparent backdrop-blur-sm rounded-t-2xl"
+                className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 sm:p-6 border-b border-[#8EB69B]/30 bg-gradient-to-r from-[#8EB69B]/10 to-transparent backdrop-blur-sm rounded-t-2xl"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
               >
-                <div>
-                  <h2 className="text-2xl font-bold text-white drop-shadow-[0_0_8px_rgba(142,182,155,0.3)]">Start Your Digital Transformation</h2>
-                  <p className="text-sm text-white/70 mt-1">Let's discuss your journey to going online</p>
+                <div className="flex-1">
+                  <h2 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white drop-shadow-[0_0_8px_rgba(142,182,155,0.3)]">Start Your Digital Transformation</h2>
+                  <p className="text-xs sm:text-sm md:text-base text-white/70 mt-1">Let's discuss your journey to going online</p>
                 </div>
-                <motion.button
-                  onClick={onClose}
-                  className="text-white/60 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10 backdrop-blur-sm"
-                  aria-label="Close modal"
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </motion.button>
+                                  <motion.button
+                    onClick={onClose}
+                    className="text-white/60 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10 backdrop-blur-sm self-end sm:self-auto"
+                    aria-label="Close modal"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+                  >
+                    <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </motion.button>
               </motion.div>
 
               {/* Form with enhanced glassmorphism */}
               <motion.form 
                 onSubmit={handleSubmit} 
-                className="relative p-6 space-y-4 bg-gradient-to-b from-transparent to-[#8EB69B]/5 backdrop-blur-sm"
+                className="relative p-4 sm:p-5 md:p-6 lg:p-8 space-y-4 sm:space-y-5 md:space-y-6 lg:space-y-8 bg-gradient-to-b from-transparent to-[#8EB69B]/5 backdrop-blur-sm overflow-y-auto max-h-[70vh]"
+                style={{ scrollbarWidth: 'thin', scrollbarColor: '#8EB69B #0B2B26' }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
@@ -255,7 +256,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                 />
 
                 {/* Name and Email */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -273,7 +274,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       onChange={handleChange}
                       required
                       autoComplete="name"
-                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      className="w-full px-3 py-2.5 md:py-3 lg:py-3.5 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm md:text-base backdrop-blur-sm"
                       style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     />
                   </motion.div>
@@ -294,14 +295,14 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       onChange={handleChange}
                       required
                       autoComplete="email"
-                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      className="w-full px-3 py-2.5 md:py-3 lg:py-3.5 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm md:text-base backdrop-blur-sm"
                       style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     />
                   </motion.div>
                 </div>
 
                 {/* Business Name and Service */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -318,7 +319,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       value={formData.businessName}
                       onChange={handleChange}
                       autoComplete="organization"
-                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                      className="w-full px-3 py-2.5 md:py-3 lg:py-3.5 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm md:text-base backdrop-blur-sm"
                       style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     />
                   </motion.div>
@@ -330,136 +331,66 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                     <label htmlFor="service" className="block text-sm font-semibold text-white/90 mb-2">
                       Service of Interest
                     </label>
-                    <select
-                      id="service"
-                      name="service"
-                      value={formData.service}
-                      onChange={handleChange}
-                      className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
-                      style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
-                    >
-                      <option value="">Select a service</option>
-                      <option value="website">Website Development</option>
-                      <option value="automation">Automation Integration (n8n)</option>
-                      <option value="voice">AI Voice Agents</option>
-                      <option value="ads">Ad Management</option>
-                      <option value="consulting">Digital Strategy Consulting</option>
-                      <option value="custom">Custom Solution</option>
-                    </select>
+                    <div className="relative">
+                      <select
+                        id="service"
+                        name="service"
+                        value={formData.service}
+                        onChange={handleChange}
+                        className="w-full px-3 py-2.5 md:py-3 lg:py-3.5 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm md:text-base backdrop-blur-sm appearance-none cursor-pointer"
+                        style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
+                      >
+                        <option value="" className="bg-[#0B2B26] text-white">Select a service</option>
+                        <option value="website" className="bg-[#0B2B26] text-white">Website Development</option>
+                        <option value="automation" className="bg-[#0B2B26] text-white">Automation Integration (n8n)</option>
+                        <option value="voice" className="bg-[#0B2B26] text-white">AI Voice Agents</option>
+                        <option value="ads" className="bg-[#0B2B26] text-white">Ad Management</option>
+                        <option value="consulting" className="bg-[#0B2B26] text-white">Digital Strategy Consulting</option>
+                        <option value="custom" className="bg-[#0B2B26] text-white">Custom Solution</option>
+                      </select>
+                      {/* Custom dropdown arrow */}
+                      <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                        <svg className="w-4 h-4 text-[#8EB69B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </div>
+                    </div>
                   </motion.div>
                 </div>
-
-                {/* Date and Time - Only shown when phone is selected */}
-                <AnimatePresence>
-                  {formData.contactMethod === "phone" && (
-                    <motion.div 
-                      className="space-y-3"
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                    >
-                      {/* Helpful hint */}
-                      <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-                        className="text-xs text-[#8EB69B]/80 text-center bg-[#8EB69B]/10 border border-[#8EB69B]/20 rounded-lg px-3 py-2 backdrop-blur-sm"
-                      >
-                        📞 Phone consultations require scheduling. Please select your preferred date and time.
-                      </motion.div>
-                      
-                      <div className="grid grid-cols-2 gap-4">
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                          <label htmlFor="date" className="block text-sm font-semibold text-white/90 mb-2">
-                            Preferred Date *
-                          </label>
-                          <input
-                            type="date"
-                            id="date"
-                            name="date"
-                            value={formData.date}
-                            onChange={handleChange}
-                            min={new Date().toISOString().split('T')[0]}
-                            required={formData.contactMethod === "phone"}
-                            className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
-                            style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
-                          />
-                        </motion.div>
-                        <motion.div
-                          initial={{ opacity: 0, y: 20 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ duration: 0.5, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                        >
-                          <label htmlFor="time" className="block text-sm font-semibold text-white/90 mb-2">
-                            Preferred Time *
-                          </label>
-                          <input
-                            type="time"
-                            id="time"
-                            name="time"
-                            value={formData.time}
-                            onChange={handleChange}
-                            required={formData.contactMethod === "phone"}
-                            className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
-                            style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
-                          />
-                        </motion.div>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
 
                 {/* Contact Method */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                  transition={{ duration: 0.5, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
                 >
                   <label className="block text-sm font-semibold text-white/90 mb-3">
                     Preferred Contact Method
                   </label>
-                  <div className="flex gap-6">
-                    <label className="flex items-center">
+                  <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 md:gap-6 lg:gap-8">
+                    <label className="flex items-center cursor-pointer">
                       <input
                         type="radio"
                         name="contactMethod"
                         value="email"
                         checked={formData.contactMethod === "email"}
                         onChange={handleChange}
-                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/40 focus:ring-[#8EB69B]/60"
+                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/40 focus:ring-[#8EB69B]/60 cursor-pointer"
                       />
-                      <span className="ml-2 text-white/90 text-sm font-medium">Email</span>
+                      <span className="ml-2 text-white/90 text-sm font-medium cursor-pointer">Email</span>
                     </label>
-                    <label className="flex items-center">
+                    <label className="flex items-center cursor-pointer">
                       <input
                         type="radio"
                         name="contactMethod"
                         value="phone"
                         checked={formData.contactMethod === "phone"}
                         onChange={handleChange}
-                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/40 focus:ring-[#8EB69B]/60"
+                        className="w-4 h-4 text-[#8EB69B] bg-[#0B2B26] border-[#8EB69B]/40 focus:ring-[#8EB69B]/60 cursor-pointer"
                       />
-                      <span className="ml-2 text-white/90 text-sm font-medium">Phone</span>
+                      <span className="ml-2 text-white/90 text-sm font-medium cursor-pointer">Phone</span>
                     </label>
                   </div>
-                  
-                  {/* Contact method hint */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.3, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="mt-3 text-xs text-[#8EB69B]/70 text-center"
-                  >
-                    {formData.contactMethod === "email" 
-                      ? "📧 Email consultations are flexible - we'll respond within 24 hours"
-                      : "📞 Phone consultations require scheduling - select your preferred time below"
-                    }
-                  </motion.div>
                 </motion.div>
 
                 {/* Phone Number (conditional) */}
@@ -472,7 +403,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                     >
                       <label htmlFor="phone" className="block text-sm font-semibold text-white/90 mb-2">
-                        Phone Number
+                        Phone Number *
                       </label>
                       <input
                         type="tel"
@@ -481,10 +412,66 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                         placeholder="+1 (555) 123-4567"
                         value={formData.phone}
                         onChange={handleChange}
+                        required={formData.contactMethod === "phone"}
                         autoComplete="tel"
-                        className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm backdrop-blur-sm"
+                        className="w-full px-3 py-2.5 md:py-3 lg:py-3.5 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm md:text-base backdrop-blur-sm"
                         style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                       />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+
+                {/* Date and Time - Only shown when phone is selected */}
+                <AnimatePresence>
+                  {formData.contactMethod === "phone" && (
+                    <motion.div 
+                      className="space-y-4"
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <label htmlFor="date" className="block text-sm font-semibold text-white/90 mb-2">
+                            Preferred Date *
+                          </label>
+                          <input
+                            type="date"
+                            id="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleChange}
+                            min={new Date().toISOString().split('T')[0]}
+                            required={formData.contactMethod === "phone"}
+                            className="w-full px-3 py-2.5 md:py-3 lg:py-3.5 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm md:text-base backdrop-blur-sm"
+                            style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
+                          />
+                        </motion.div>
+                        <motion.div
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.5, delay: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                        >
+                          <label htmlFor="time" className="block text-sm font-semibold text-white/90 mb-2">
+                            Preferred Time *
+                          </label>
+                          <input
+                            type="time"
+                            id="time"
+                            name="time"
+                            value={formData.time}
+                            onChange={handleChange}
+                            required={formData.contactMethod === "phone"}
+                            className="w-full px-3 py-2.5 md:py-3 lg:py-3.5 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all duration-300 text-sm md:text-base backdrop-blur-sm"
+                            style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
+                          />
+                        </motion.div>
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
@@ -505,7 +492,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                     value={formData.message}
                     onChange={handleChange}
                     rows={3}
-                    className="w-full px-3 py-2 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all resize-none duration-300 text-sm backdrop-blur-sm"
+                    className="w-full px-3 py-2.5 md:py-3 lg:py-3.5 bg-gradient-to-r from-[#0B2B26]/60 to-[#163832]/60 border border-[#8EB69B]/40 rounded-xl text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-[#8EB69B]/60 focus:border-[#8EB69B] transition-all resize-none duration-300 text-sm md:text-base backdrop-blur-sm"
                     style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                   />
                 </motion.div>

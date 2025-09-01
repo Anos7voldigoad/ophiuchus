@@ -6,22 +6,38 @@
   "keywords": [
     "digital transformation",
     "website development",
-    "automation",
-    "AI",
-    "business solutions"
+    "n8n automation",
+    "AI voice agents",
+    "ad management",
+    "full-stack development",
+    "business automation",
+    "online business",
+    "e-commerce",
+    "digital marketing",
+    "web development services",
+    "business automation tools",
+    "AI business solutions",
+    "digital marketing agency",
+    "website optimization"
   ],
   "author": "Ophiuschus AI",
   "license": "MIT",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:analyze": "vite build --mode analyze",
+    "build:production": "vite build --mode production",
     "preview": "vite preview",
     "analyze": "vite build --mode analyze",
     "lighthouse": "lighthouse http://localhost:3000 --output html --output-path ./lighthouse-report.html",
     "type-check": "tsc --noEmit",
     "lint": "eslint src --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "format": "prettier --write src/**/*.{ts,tsx,css,md}",
-    "postbuild": "echo 'Build completed successfully'"
+    "postbuild": "echo 'Build completed successfully'",
+    "test:performance": "lighthouse http://localhost:3000 --only-categories=performance --output html",
+    "test:seo": "lighthouse http://localhost:3000 --only-categories=seo --output html",
+    "test:accessibility": "lighthouse http://localhost:3000 --only-categories=accessibility --output html",
+    "test:best-practices": "lighthouse http://localhost:3000 --only-categories=best-practices --output html"
   },
   "dependencies": {
     "framer-motion": "^10.18.0",
@@ -29,18 +45,19 @@
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@types/node": "^24.3.0",
     "@types/react": "^18.3.24",
     "@types/react-dom": "^18.3.7",
-    "@vitejs/plugin-react": "^4.7.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "autoprefixer": "^10.4.21",
+    "cssnano": "^7.0.6",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "terser": "^5.43.1",
     "typescript": "^5.9.2",
     "vite": "^5.4.12",
-    "vite-plugin-compression": "^0.5.1",
     "vite-plugin-html": "^3.2.0",
-    "vite-plugin-pwa": "^0.19.0"
+    "vite-plugin-pwa": "^0.20.0"
   },
   "engines": {
     "node": ">=16.0.0",
