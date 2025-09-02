@@ -9,8 +9,8 @@ interface ConsultationModalProps {
 }
 
 // reCAPTCHA configuration
-const RECAPTCHA_SITE_KEY = "6Lfv3rorAAAAAAlQQeKH9p3VrJ61r1psji23tQOk";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzTZsKklWDkrnzvG5cBXF-TfZxIpAXe12TWRPgConIta6ivjaxe5Zy6Lyv6Ybtc_ODKgw/exec";
+const RECAPTCHA_SITE_KEY = "6LdBwbsrAAAAADZQW88u6bnAT1RR4wNEWV7NbyfW";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyISu2Tzx8ZiPK_6wRIyqEalP8I98Ox61gWbOSuA0jf7q7OjKL7yg9CUAiQvfsW8MnxuA/exec";
 
 const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
@@ -50,15 +50,18 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
   const getRecaptchaToken = async (): Promise<string> => {
     return new Promise((resolve, reject) => {
       if (!recaptchaLoaded) {
+        console.error('reCAPTCHA not loaded');
         reject(new Error('reCAPTCHA not loaded'));
         return;
       }
-
       try {
+        console.log('Calling grecaptcha.ready');
         (window as any).grecaptcha.ready(() => {
+          console.log('Calling grecaptcha.execute');
           (window as any).grecaptcha
             .execute(RECAPTCHA_SITE_KEY, { action: "submit" })
             .then((token: string) => {
+              console.log('reCAPTCHA token received:', token);
               resolve(token);
             })
             .catch((error: any) => {
@@ -94,6 +97,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
     try {
       // Get reCAPTCHA token
       const token = await getRecaptchaToken();
+      console.log('Token to be sent with form:', token);
 
       // Build URL-encoded body
       const body = new URLSearchParams();
@@ -123,6 +127,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
       }
 
       const result = await response.json();
+      console.log('Apps Script response:', result);
       
       if (result.success) {
         setStatus("success");
