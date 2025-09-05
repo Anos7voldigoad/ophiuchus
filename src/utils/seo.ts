@@ -20,7 +20,7 @@ export interface MetaTags {
 export interface StructuredData {
   '@context': string;
   '@type': string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -53,14 +53,14 @@ export class SEOManager {
     // Update meta tags
     this.updateMetaTag('name', 'description', meta.description);
     this.updateMetaTag('name', 'keywords', meta.keywords.join(', '));
-    this.updateMetaTag('name', 'author', meta.author);
-    this.updateMetaTag('name', 'language', meta.language);
-    this.updateMetaTag('name', 'robots', meta.robots);
+    if (meta.author) this.updateMetaTag('name', 'author', meta.author);
+    if (meta.language) this.updateMetaTag('name', 'language', meta.language);
+    if (meta.robots) this.updateMetaTag('name', 'robots', meta.robots);
 
     // Update Open Graph tags
     this.updateMetaTag('property', 'og:title', meta.ogTitle || meta.title);
     this.updateMetaTag('property', 'og:description', meta.ogDescription || meta.description);
-    this.updateMetaTag('property', 'og:image', meta.ogImage);
+    if (meta.ogImage) this.updateMetaTag('property', 'og:image', meta.ogImage);
     this.updateMetaTag('property', 'og:url', meta.ogUrl || window.location.href);
     this.updateMetaTag('property', 'og:type', 'website');
 
@@ -124,7 +124,6 @@ export class SEOManager {
       description: 'Transform your business online with our complete digital solutions. Full-stack websites, n8n automation, AI voice agents, and ad management.',
       keywords: ['digital transformation', 'website development', 'automation', 'AI', 'business solutions'],
       author: 'Ophiuschus AI',
-      email: 'ophiuchus.ai@gmail.com',
       language: 'en',
       robots: 'index, follow'
     };

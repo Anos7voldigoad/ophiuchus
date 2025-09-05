@@ -1,6 +1,7 @@
 # Ophiuschus AI - Digital Transformation Solutions
 
-A high-performance, SEO-optimized website built with React, TypeScript, and modern web technologies.
+A high-performance, SEO-optimized website built with React, TypeScript,
+and modern web technologies.
 
 ## 🚀 Performance Optimizations
 
@@ -227,8 +228,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🆘 Support
 
 For support and questions:
-- Email: hello@ophiuschus.ai
-- Website: https://ophiuschus.ai
+- Email: <hello@ophiuschus.ai>
+- Website: <https://ophiuschus.ai>
 - Documentation: [Project Wiki](https://github.com/your-username/ophiuschus-ai/wiki)
 
 ---

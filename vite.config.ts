@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 import { resolve } from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 import { createHtmlPlugin } from 'vite-plugin-html'
+import autoprefixer from 'autoprefixer'
+import tailwindcss from 'tailwindcss'
+import cssnano from 'cssnano'
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -116,7 +119,7 @@ export default defineConfig({
         },
         chunkFileNames: (chunkInfo) => {
           const facadeModuleId = chunkInfo.facadeModuleId ? chunkInfo.facadeModuleId.split('/').pop() : 'chunk'
-          return `assets/js/[name]-[hash].js`
+          return `assets/js/${facadeModuleId}-[hash].js`
         },
         entryFileNames: 'assets/js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
@@ -179,9 +182,9 @@ export default defineConfig({
   css: {
     postcss: {
       plugins: [
-        require('autoprefixer'),
-        require('tailwindcss'),
-        require('cssnano')({
+        autoprefixer,
+        tailwindcss,
+        cssnano({
           preset: ['default', {
             discardComments: { removeAll: true },
             normalizeWhitespace: true,

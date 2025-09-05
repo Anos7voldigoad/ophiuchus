@@ -65,7 +65,7 @@ export class PerformanceMonitor {
         this.metrics.fid = fidEntry.processingStart - fidEntry.startTime;
         break;
       case 'layout-shift':
-        const clsEntry = entry as LayoutShift;
+        const clsEntry = entry as any;
         this.metrics.cls = (this.metrics.cls || 0) + clsEntry.value;
         break;
       case 'first-contentful-paint':

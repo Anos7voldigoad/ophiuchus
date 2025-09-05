@@ -12,6 +12,18 @@ interface ConsultationModalProps {
 const RECAPTCHA_SITE_KEY = "6LciPr8rAAAAAEVr-OLxqorK6I-7-XJfsS1on4lc";
 const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxShoXrTcyRqAd3Qh9m37TnVPoRUwYDKHgsKbg71BotVv6cfKRaHjUYV-DU_JYxxfl5kw/exec";
 
+// Type definitions for reCAPTCHA
+interface GreCaptcha {
+  ready: (callback: () => void) => void;
+  execute: (siteKey: string, options: { action: string }) => Promise<string>;
+}
+
+declare global {
+  interface Window {
+    grecaptcha: GreCaptcha;
+  }
+}
+
 const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
     name: "",
@@ -33,7 +45,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
   // Check if reCAPTCHA is loaded
   useEffect(() => {
     const checkRecaptcha = () => {
-      if (typeof window !== 'undefined' && (window as any).grecaptcha) {
+      if (typeof window !== 'undefined' && window.grecaptcha) {
         setRecaptchaLoaded(true);
       } else {
         setTimeout(checkRecaptcha, 100);
@@ -56,15 +68,15 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
       }
       try {
         console.log('Calling grecaptcha.ready');
-        (window as any).grecaptcha.ready(() => {
+        window.grecaptcha.ready(() => {
           console.log('Calling grecaptcha.execute');
-          (window as any).grecaptcha
+          window.grecaptcha
             .execute(RECAPTCHA_SITE_KEY, { action: "submit" })
             .then((token: string) => {
               console.log('reCAPTCHA token received:', token);
               resolve(token);
             })
-            .catch((error: any) => {
+            .catch((error) => {
               console.error('reCAPTCHA execution error:', error);
               reject(error);
             });
@@ -153,7 +165,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
         console.error("Apps Script error:", result);
         setStatus("error");
       }
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Submission error:", err);
       setStatus("error");
     } finally {
