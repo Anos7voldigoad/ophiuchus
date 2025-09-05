@@ -331,6 +331,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       style={{ boxShadow: '0 4px 20px rgba(142, 182, 155, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05)' }}
                     >
                       <option value="">Select a service</option>
+                       <option value="full one tap system">one tap online</option>
                       <option value="website">Website Development</option>
                       <option value="automation">Automation Integration (n8n)</option>
                       <option value="voice">AI Voice Agents</option>
