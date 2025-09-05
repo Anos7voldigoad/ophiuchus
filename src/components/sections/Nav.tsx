@@ -36,7 +36,7 @@ const Nav: React.FC = () => {
           >
             <img src={viperLogo} alt="Ophiuschus logo" className="h-6 w-6 object-contain" />
           </motion.div>
-          <span className="text-lg font-semibold tracking-tight text-white drop-shadow-[0_0_8px_rgba(142,182,155,0.3)]">Ophiuschus AI</span>
+          <span className="text-lg font-semibold tracking-tight text-white drop-shadow-[0_0_8px_rgba(142,182,155,0.3)]">Ophiuschus</span>
         </motion.div>
 
         {/* Desktop nav */}
