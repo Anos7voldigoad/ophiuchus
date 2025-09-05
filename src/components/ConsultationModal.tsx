@@ -9,8 +9,8 @@ interface ConsultationModalProps {
 }
 
 // reCAPTCHA configuration
-const RECAPTCHA_SITE_KEY = "6LdBwbsrAAAAADZQW88u6bnAT1RR4wNEWV7NbyfW";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyISu2Tzx8ZiPK_6wRIyqEalP8I98Ox61gWbOSuA0jf7q7OjKL7yg9CUAiQvfsW8MnxuA/exec";
+const RECAPTCHA_SITE_KEY = "6LciPr8rAAAAAEVr-OLxqorK6I-7-XJfsS1on4lc";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxShoXrTcyRqAd3Qh9m37TnVPoRUwYDKHgsKbg71BotVv6cfKRaHjUYV-DU_JYxxfl5kw/exec";
 
 const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }) => {
   const [formData, setFormData] = useState({
