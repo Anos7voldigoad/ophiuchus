@@ -60,7 +60,7 @@ const CTA: React.FC = () => (
             Start Your Transformation
           </motion.a>
           <motion.a 
-            href="https://mail.google.com/mail/?view=cm&fs=1&to=ophiuschus.ai@gmail.com" 
+            href="https://mail.google.com/mail/?view=cm&fs=1&to=ophiuchus.ai@gmail.com" 
             target="_blank" 
             rel="noopener" 
             aria-label="Email us at hello@ophiuschus.ai" 

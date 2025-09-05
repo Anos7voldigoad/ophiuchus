@@ -522,7 +522,7 @@ const ConsultationModal: React.FC<ConsultationModalProps> = ({ isOpen, onClose }
                       className="p-3 bg-gradient-to-r from-red-500/20 to-red-600/20 border border-red-500/40 rounded-xl text-red-300 text-sm text-center backdrop-blur-sm"
                       style={{ boxShadow: '0 4px 20px rgba(239, 68, 68, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1)' }}
                     >
-                      Something went wrong. Please try again or contact us directly at hello@ophiuschus.ai
+                      Something went wrong. Please try again or contact us directly at ophiuchus.ai@gmail.com
                     </motion.div>
                   )}
                 </AnimatePresence>
