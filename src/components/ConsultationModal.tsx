@@ -10,7 +10,7 @@ interface ConsultationModalProps {
 
 // reCAPTCHA configuration
 const RECAPTCHA_SITE_KEY = "6LciPr8rAAAAAEVr-OLxqorK6I-7-XJfsS1on4lc";
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxShoXrTcyRqAd3Qh9m37TnVPoRUwYDKHgsKbg71BotVv6cfKRaHjUYV-DU_JYxxfl5kw/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzv3NaxSABK7KWMRneeoJlbcZ3eEFHZGCsa9otupiSjAmJTH3EQ3JRW_9im-9XVqFKf/exec";
 
 // Type definitions for reCAPTCHA
 interface GreCaptcha {
